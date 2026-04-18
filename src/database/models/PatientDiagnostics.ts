@@ -1,7 +1,7 @@
 import { DataTypes, Model, Optional } from "sequelize";
 import sequelize from "../sequelize";
 
-interface PatientDiagnosticsAttributes {
+interface PatientDiagnosticAttributes {
   diagnostic_id: string;
   patient_id: string;
   media_url?: string;
@@ -11,17 +11,17 @@ interface PatientDiagnosticsAttributes {
   created_at?: Date;
 }
 
-interface PatientDiagnosticsCreationAttributes extends Optional<
-  PatientDiagnosticsAttributes,
+interface PatientDiagnosticCreationAttributes extends Optional<
+  PatientDiagnosticAttributes,
   "diagnostic_id" | "created_at" | "media_url" | "description" | "media_type"
 > {}
 
-class PatientDiagnostics
+class PatientDiagnostic
   extends Model<
-    PatientDiagnosticsAttributes,
-    PatientDiagnosticsCreationAttributes
+    PatientDiagnosticAttributes,
+    PatientDiagnosticCreationAttributes
   >
-  implements PatientDiagnosticsAttributes
+  implements PatientDiagnosticAttributes
 {
   public diagnostic_id!: string;
   public patient_id!: string;
@@ -32,11 +32,11 @@ class PatientDiagnostics
   public created_at?: Date;
 }
 
-PatientDiagnostics.init(
+PatientDiagnostic.init(
   {
     diagnostic_id: {
       type: DataTypes.UUID,
-      defaultValue: sequelize.literal("uuid_generate_v4()"),
+      defaultValue: sequelize.literal("gen_random_uuid()"),
       primaryKey: true,
       allowNull: false,
     },
@@ -78,10 +78,10 @@ PatientDiagnostics.init(
   },
   {
     sequelize,
-    modelName: "PatientDiagnostics",
+    modelName: "PatientDiagnostic",
     tableName: "patient_diagnostics",
     timestamps: false,
   },
 );
 
-export default PatientDiagnostics;
+export default PatientDiagnostic;

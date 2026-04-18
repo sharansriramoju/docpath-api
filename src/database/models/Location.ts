@@ -33,7 +33,7 @@ Location.init(
   {
     location_id: {
       type: DataTypes.UUID,
-      defaultValue: sequelize.literal("uuid_generate_v4()"),
+      defaultValue: sequelize.literal("gen_random_uuid()"),
       primaryKey: true,
       allowNull: false,
     },

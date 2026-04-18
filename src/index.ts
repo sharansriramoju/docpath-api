@@ -5,8 +5,8 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import crypto from "crypto";
 import "dotenv/config";
-// import { sequelize } from "./database/models/index";
-// import { runSeeders } from "./database/seeder";
+import { sequelize } from "./database/models/index";
+import { runSeeders } from "./database/seeder";
 // import session from "express-session";
 // import admin from "firebase-admin";
 // import { RedisStore } from "connect-redis";
@@ -116,8 +116,8 @@ app.get("/health", async (req, res) => {
 server.listen(port, host, async () => {
   // await runMigrations();
   try {
-    // await sequelize.sync({ alter: true });
-    // await runSeeders();
+    await sequelize.sync({ alter: true });
+    await runSeeders();
   } catch (error) {
     console.error("❌ Failed to run migrations:", error);
   }
