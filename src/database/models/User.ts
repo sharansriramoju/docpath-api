@@ -7,17 +7,24 @@ interface UserAttributes {
   email?: string;
   phone: string;
   gender: string;
-  date_of_birth: Date;
+  date_of_birth: string;
   role_id?: number;
+  profile_image_url?: string;
   created_at?: Date;
   updated_at?: Date;
-  hashed_email?: string;
-  hashed_phone?: string;
+  hashed_email?: Buffer;
+  hashed_phone: Buffer;
 }
 
 interface UserCreationAttributes extends Optional<
   UserAttributes,
-  "user_id" | "updated_at" | "created_at" | "email" | "role_id"
+  | "user_id"
+  | "updated_at"
+  | "created_at"
+  | "email"
+  | "role_id"
+  | "profile_image_url"
+  | "hashed_email"
 > {}
 
 class User
@@ -29,8 +36,11 @@ class User
   public email?: string;
   public phone!: string;
   public gender!: string;
-  public date_of_birth!: Date;
+  public date_of_birth!: string;
   public role_id?: number;
+  public profile_image_url?: string;
+  public hashed_email?: Buffer;
+  public hashed_phone!: Buffer;
   public created_at?: Date;
   public updated_at?: Date;
 }
@@ -49,26 +59,26 @@ User.init(
     email: {
       type: DataTypes.TEXT,
       unique: true,
-      allowNull: false,
+      allowNull: true,
     },
     phone: {
       type: DataTypes.TEXT,
-      allowNull: true,
+      allowNull: false,
     },
     hashed_phone: {
-      type: DataTypes.TEXT,
-      allowNull: true,
+      type: DataTypes.BLOB,
+      allowNull: false,
     },
     hashed_email: {
-      type: DataTypes.TEXT,
+      type: DataTypes.BLOB,
       allowNull: true,
     },
     gender: {
-      type: DataTypes.STRING,
+      type: DataTypes.TEXT,
       allowNull: false,
     },
     date_of_birth: {
-      type: DataTypes.DATE,
+      type: DataTypes.TEXT,
       allowNull: false,
     },
     role_id: {
@@ -78,6 +88,10 @@ User.init(
         model: "roles",
         key: "role_id",
       },
+    },
+    profile_image_url: {
+      type: DataTypes.TEXT,
+      allowNull: true,
     },
     updated_at: {
       type: DataTypes.DATE,
