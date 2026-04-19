@@ -14,6 +14,7 @@ import redisClient, {
   connectRedis as connectRedisClient,
 } from "./database/redis";
 import router from "./routes/index.route";
+import { globalErrorHandler } from "./middlewares/error.middleware";
 // import "./jobs/listings.cronjob";
 // import "./jobs/interactions.cronjob";
 
@@ -96,6 +97,8 @@ app.get("/health", async (req, res) => {
 });
 
 app.use("/api", router());
+
+app.use(globalErrorHandler);
 
 // --- Start server --- //
 server.listen(port, host, async () => {

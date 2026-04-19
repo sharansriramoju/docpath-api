@@ -3,15 +3,15 @@ import sequelize from "../sequelize";
 
 interface OtpAttributes {
   id: number;
-  otp: string;
-  phone?: string;
-  email?: string;
-  createdAt?: Date;
+  otp: Buffer;
+  phone?: Buffer;
+  email?: Buffer;
+  created_at?: Date;
 }
 
 interface OtpCreationAttributes extends Optional<
   OtpAttributes,
-  "id" | "createdAt" | "phone" | "email"
+  "id" | "created_at" | "phone" | "email"
 > {}
 
 class Otp
@@ -19,10 +19,10 @@ class Otp
   implements OtpAttributes
 {
   public id!: number;
-  public otp!: string;
-  public phone?: string;
-  public email?: string;
-  public createdAt?: Date;
+  public otp!: Buffer;
+  public phone?: Buffer;
+  public email?: Buffer;
+  public created_at?: Date;
 }
 
 Otp.init(
@@ -33,18 +33,18 @@ Otp.init(
       primaryKey: true,
     },
     otp: {
-      type: DataTypes.STRING,
+      type: DataTypes.BLOB,
       allowNull: false,
     },
     phone: {
-      type: DataTypes.STRING,
+      type: DataTypes.BLOB,
       allowNull: true,
     },
     email: {
-      type: DataTypes.STRING,
+      type: DataTypes.BLOB,
       allowNull: true,
     },
-    createdAt: {
+    created_at: {
       type: DataTypes.DATE,
       allowNull: false,
       defaultValue: sequelize.literal(

@@ -1,5 +1,10 @@
 import { sequelize } from "../database/models";
-import { createUserRepository } from "../database/repositories/users.repository";
+import {
+  createUserRepository,
+  getUserByHashedEmailRepository,
+  getUserByHashedPhoneRepository,
+} from "../database/repositories/users.repository";
+import { NotFoundError } from "../errors/NotFoundError";
 import { encryptPII, hashForLookup } from "../helpers/index.helper";
 
 export const createUserService = async (userData: {
@@ -23,7 +28,20 @@ export const createUserService = async (userData: {
     hashed_email,
   };
   return await sequelize.transaction(async (t) => {
-    const user = await createUserRepository(encryptedUserData);
+    const existingUserByPhone = await getUserByHashedPhoneRepository(
+      hashed_phone,
+      t,
+    );
+    if (existingUserByPhone) {
+      throw new NotFoundError("User with this phone number already exists");
+    }
+    const existingUserByEmail = userData.email
+      ? await getUserByHashedEmailRepository(hashed_email!, t)
+      : null;
+    if (existingUserByEmail) {
+      throw new NotFoundError("User with this email already exists");
+    }
+    const user = await createUserRepository(encryptedUserData, t);
     return user;
   });
 };
