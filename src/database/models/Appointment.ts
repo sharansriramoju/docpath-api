@@ -13,11 +13,12 @@ interface AppointmentAttributes {
   prescription?: string;
   created_at?: Date;
   created_by_id: string;
+  status: "scheduled" | "completed" | "cancelled";
 }
 
 interface AppointmentCreationAttributes extends Optional<
   AppointmentAttributes,
-  "appointment_id" | "created_at" | "doctor_notes" | "prescription"
+  "appointment_id" | "created_at" | "doctor_notes" | "prescription" | "status"
 > {}
 
 class Appointment
@@ -33,6 +34,7 @@ class Appointment
   public end_time!: string;
   public doctor_notes?: string;
   public prescription?: string;
+  public status!: "scheduled" | "completed" | "cancelled";
   public created_at?: Date;
   public created_by_id!: string;
 }
@@ -96,6 +98,11 @@ Appointment.init(
         model: "users",
         key: "user_id",
       },
+    },
+    status: {
+      type: DataTypes.ENUM("scheduled", "completed", "cancelled"),
+      defaultValue: "scheduled",
+      allowNull: false,
     },
     created_at: {
       type: DataTypes.DATE,
