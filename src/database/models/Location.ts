@@ -7,13 +7,14 @@ interface LocationAttributes {
   latitude?: string;
   longitude?: string;
   google_maps_url: string;
+  status?: "active" | "inactive";
   created_at?: Date;
   created_by_id: string;
 }
 
 interface LocationCreationAttributes extends Optional<
   LocationAttributes,
-  "location_id" | "created_at"
+  "location_id" | "created_at" | "latitude" | "longitude" | "status"
 > {}
 
 class Location
@@ -27,6 +28,7 @@ class Location
   public google_maps_url!: string;
   public created_at?: Date;
   public created_by_id!: string;
+  public status?: "active" | "inactive";
 }
 
 Location.init(
@@ -66,6 +68,10 @@ Location.init(
       defaultValue: sequelize.literal(
         "(CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Kolkata'::text)",
       ),
+    },
+    status: {
+      type: DataTypes.ENUM("active", "inactive"),
+      defaultValue: "active",
     },
   },
   {

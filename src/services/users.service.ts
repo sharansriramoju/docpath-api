@@ -45,3 +45,12 @@ export const createUserService = async (userData: {
     return user;
   });
 };
+
+export const getUserByPhoneService = async (phone: string) => {
+  const hashed_phone = hashForLookup(phone);
+  const user = await getUserByHashedPhoneRepository(hashed_phone);
+  if (!user) {
+    throw new NotFoundError("User not found");
+  }
+  return user;
+};
