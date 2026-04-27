@@ -9,6 +9,8 @@ import PatientDiagnostic from "./PatientDiagnostics";
 import DoctorRoutine from "./DoctorRoutine";
 import DoctorSchedule from "./DoctorSchedule";
 import Otp from "./Otp";
+import RolePermission from "./RolePermission";
+import Permission from "./Permission";
 
 // User-Role Associations
 Role.hasMany(User, { foreignKey: "role_id", as: "users" });
@@ -209,10 +211,48 @@ Location.hasMany(DoctorSchedule, {
   onUpdate: "CASCADE",
 });
 
+// RolePermission Associations
+RolePermission.belongsTo(Role, {
+  foreignKey: "role_id",
+  as: "role",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+RolePermission.belongsTo(Permission, {
+  foreignKey: "permission_id",
+  as: "permission",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+Role.hasMany(RolePermission, {
+  foreignKey: "role_id",
+  as: "role_permissions",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+Permission.hasMany(RolePermission, {
+  foreignKey: "permission_id",
+  as: "permission_roles",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+
+// User - Permission Associations (through RolePermission)
+User.belongsToMany(Permission, {
+  through: RolePermission,
+  foreignKey: "role_id",
+  otherKey: "permission_id",
+  as: "permissions",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+
 export {
   sequelize,
   User,
   Role,
+  Permission,
+  RolePermission,
   Location,
   Appointment,
   AppointmentMedia,

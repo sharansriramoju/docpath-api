@@ -4,11 +4,11 @@ import sequelize from "../sequelize";
 interface DoctorRoutineAttributes {
   routine_id: string;
   doctor_id: string;
-  index: number;
+  index?: number;
   day_of_week: number;
   start_time: string;
   end_time: string;
-  location_id?: string;
+  location_id: string;
   created_by_id: string;
   created_at?: Date;
 }
@@ -24,11 +24,11 @@ class DoctorRoutine
 {
   public routine_id!: string;
   public doctor_id!: string;
-  public index!: number;
+  public index?: number;
   public day_of_week!: number;
   public start_time!: string;
   public end_time!: string;
-  public location_id?: string;
+  public location_id!: string;
   public created_by_id!: string;
   public created_at?: Date;
 }
@@ -51,7 +51,7 @@ DoctorRoutine.init(
     },
     index: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: true,
     },
     day_of_week: {
       type: DataTypes.INTEGER,
@@ -67,7 +67,7 @@ DoctorRoutine.init(
     },
     location_id: {
       type: DataTypes.UUID,
-      allowNull: true,
+      allowNull: false,
       references: {
         model: "locations",
         key: "location_id",
@@ -92,7 +92,7 @@ DoctorRoutine.init(
   {
     sequelize,
     modelName: "DoctorRoutine",
-    tableName: "doctor_routines",
+    tableName: "doctor_routine",
     timestamps: false,
   },
 );
