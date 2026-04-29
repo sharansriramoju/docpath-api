@@ -31,7 +31,7 @@ Permission.init(
   {
     permission_id: {
       type: DataTypes.UUID,
-      defaultValue: DataTypes.UUIDV4,
+      defaultValue: sequelize.literal("gen_random_uuid()"),
       primaryKey: true,
     },
     action: {
@@ -44,7 +44,9 @@ Permission.init(
     },
     created_at: {
       type: DataTypes.DATE,
-      defaultValue: DataTypes.NOW,
+      defaultValue: sequelize.literal(
+        "(CURRENT_TIMESTAMP AT TIME ZONE 'Asia/Kolkata'::text)",
+      ),
       allowNull: false,
     },
   },

@@ -1,5 +1,5 @@
 import { Transaction } from "sequelize";
-import { Role, User } from "../models";
+import { Permission, Role, User } from "../models";
 
 export const createUserRepository = async (
   userData: {
@@ -28,6 +28,12 @@ export const getUserByHashedPhoneRepository = async (
         model: Role,
         as: "role",
         attributes: ["role_id", "name"],
+      },
+      {
+        model: Permission,
+        as: "permissions",
+        through: { attributes: ["role_id", "permission_id", "conditions"] },
+        attributes: ["permission_id", "action", "subject", "created_at"],
       },
     ],
     transaction: t,

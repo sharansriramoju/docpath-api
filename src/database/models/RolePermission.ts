@@ -5,7 +5,7 @@ import sequelize from "../sequelize";
 
 interface RolePermissionAttributes {
   id: number;
-  role_id: string;
+  role_id: number;
   permission_id: string;
   scope?: "ALL" | "LIMITED";
   conditions?: object;
@@ -21,7 +21,7 @@ class RolePermission
   implements RolePermissionAttributes
 {
   public id!: number;
-  public role_id!: string;
+  public role_id!: number;
   public permission_id!: string;
   public scope?: "ALL" | "LIMITED";
   public conditions?: object;
@@ -39,7 +39,7 @@ RolePermission.init(
       primaryKey: true,
     },
     role_id: {
-      type: DataTypes.UUID,
+      type: DataTypes.INTEGER,
       allowNull: false,
       references: {
         model: "roles",

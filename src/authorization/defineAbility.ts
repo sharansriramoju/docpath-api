@@ -4,9 +4,8 @@ export function defineAbilityFor(user: any) {
   const { can, build } = new AbilityBuilder(createMongoAbility);
 
   // Super admin
-  if (user.role.name === "Doctor") {
-    can("manage", "all");
-    return build();
+  for (const perm of user.permissions) {
+    can(perm.action, perm.subject, perm.RolePermission.conditions);
   }
 
   return build();

@@ -237,14 +237,42 @@ Permission.hasMany(RolePermission, {
   onUpdate: "CASCADE",
 });
 
-// User - Permission Associations (through RolePermission)
-User.belongsToMany(Permission, {
+// Role - Permission Associations (through RolePermission)
+Role.belongsToMany(Permission, {
   through: RolePermission,
   foreignKey: "role_id",
   otherKey: "permission_id",
   as: "permissions",
   onDelete: "CASCADE",
   onUpdate: "CASCADE",
+});
+
+Permission.belongsToMany(Role, {
+  through: RolePermission,
+  foreignKey: "permission_id",
+  otherKey: "role_id",
+  as: "roles",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+
+// User - Permission Associations (through RolePermission via User.role_id)
+User.belongsToMany(Permission, {
+  through: RolePermission,
+  foreignKey: "role_id",
+  otherKey: "permission_id",
+  sourceKey: "role_id",
+  as: "permissions",
+  constraints: false,
+});
+
+Permission.belongsToMany(User, {
+  through: RolePermission,
+  foreignKey: "permission_id",
+  otherKey: "role_id",
+  targetKey: "role_id",
+  as: "users",
+  constraints: false,
 });
 
 export {

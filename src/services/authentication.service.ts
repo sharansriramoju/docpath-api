@@ -68,6 +68,7 @@ export const verifyOtpService = async (data: {
       date_of_birth: decryptPII(user.date_of_birth),
       gender: decryptPII(user.gender),
       role: user.role,
+      permissions: user.permissions,
     };
   });
 };
