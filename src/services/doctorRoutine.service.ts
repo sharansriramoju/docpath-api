@@ -16,14 +16,22 @@ export const addDoctorRoutineService = async (
   userAbility: any,
 ) => {
   return await sequelize.transaction(async (t) => {
-    const doctor = await getDoctorByUserIdRepository(data.doctor_id, t);
-    if (!doctor) {
-      throw new Error("Doctor not found");
+    if (data.doctor_id !== data.created_by_id) {
+      const doctor = await getDoctorByUserIdRepository(data.doctor_id, t);
+      if (!doctor) {
+        throw new Error("Doctor not found");
+      }
+      console.log("checking ability for user", userAbility);
+      console.log(
+        "subject for ability check",
+        subject("DoctorRoutine", doctor),
+      );
+      ForbiddenError.from(userAbility).throwUnlessCan(
+        "create",
+        subject("DoctorRoutine", doctor),
+      );
+      console.log("ability check passed");
     }
-    ForbiddenError.from(userAbility).throwUnlessCan(
-      "create",
-      subject("DoctorRoutine", doctor),
-    );
     return await addDoctorRoutineRepository(data, t);
   });
 };
