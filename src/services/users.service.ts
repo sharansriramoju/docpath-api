@@ -13,6 +13,7 @@ export const createUserService = async (userData: {
   phone: string;
   gender: string;
   date_of_birth: string;
+  reporting_doctor_id?: string;
 }) => {
   const hashed_phone = hashForLookup(userData.phone);
   const hashed_email = userData.email
@@ -26,6 +27,7 @@ export const createUserService = async (userData: {
     date_of_birth: encryptPII(userData.date_of_birth).payload,
     hashed_phone,
     hashed_email,
+    reporting_doctor_id: userData.reporting_doctor_id,
   };
   return await sequelize.transaction(async (t) => {
     const existingUserByPhone = await getUserByHashedPhoneRepository(

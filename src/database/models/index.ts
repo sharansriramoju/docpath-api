@@ -275,6 +275,21 @@ Permission.belongsToMany(User, {
   constraints: false,
 });
 
+// reporting_doctor_id Associations
+User.belongsTo(User, {
+  foreignKey: "reporting_doctor_id",
+  as: "reporting_doctor",
+  onDelete: "SET NULL",
+  onUpdate: "CASCADE",
+});
+
+User.hasMany(User, {
+  foreignKey: "reporting_doctor_id",
+  as: "reporting_patients",
+  onDelete: "SET NULL",
+  onUpdate: "CASCADE",
+});
+
 export {
   sequelize,
   User,

@@ -1,4 +1,3 @@
-import { stat } from "fs";
 import z from "zod";
 
 export const createLocationValidation = z.object({

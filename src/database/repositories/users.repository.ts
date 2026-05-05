@@ -32,7 +32,9 @@ export const getUserByHashedPhoneRepository = async (
       {
         model: Permission,
         as: "permissions",
-        through: { attributes: ["role_id", "permission_id", "conditions"] },
+        through: {
+          attributes: ["role_id", "permission_id", "conditions", "scope"],
+        },
         attributes: ["permission_id", "action", "subject", "created_at"],
       },
     ],
@@ -47,6 +49,16 @@ export const getUserByHashedEmailRepository = async (
 ) => {
   const user = await User.findOne({
     where: { hashed_email: hashedEmail },
+    transaction: t,
+  });
+  return user;
+};
+
+export const getDoctorByUserIdRepository = async (
+  userId: string,
+  t?: Transaction,
+) => {
+  const user = await User.findByPk(userId, {
     transaction: t,
   });
   return user;

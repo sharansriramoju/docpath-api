@@ -5,6 +5,7 @@ import {
   validate,
 } from "../middlewares/index.middleware";
 import { addDoctorRoutineValidation } from "../validations/doctorRoutine.validation";
+import { addDoctorRoutineController } from "../controller/doctorRoutine.controller";
 
 export default (router: Router) => {
   router.post(
@@ -12,5 +13,7 @@ export default (router: Router) => {
     isAuthenticated,
     authorize("create", "DoctorRoutine"),
     validate(addDoctorRoutineValidation),
+    addDoctorRoutineController,
   );
+  // router.get("/docto");
 };

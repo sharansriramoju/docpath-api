@@ -17,4 +17,5 @@ export const createUserValidation = z.object({
     .refine((date) => {
       return new Date(date) < new Date();
     }, "date_of_birth must be in the past"),
+  reporting_doctor_id: z.string().optional(),
 });
