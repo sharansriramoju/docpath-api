@@ -11,7 +11,7 @@ export const addDoctorRoutineRepository = async (
     location_id: string;
     created_by_id: string;
   },
-  t: Transaction,
+  t?: Transaction,
 ) => {
   const doctorRoutine = await DoctorRoutine.create(data, { transaction: t });
   return doctorRoutine.dataValues;

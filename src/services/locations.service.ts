@@ -15,13 +15,11 @@ export const createLocationService = async (
   },
   user_id: string,
 ) => {
-  return await sequelize.transaction(async (t) => {
-    const location = await createLocationRepository(
-      { ...locationData, created_by_id: user_id },
-      t,
-    );
-    return location;
+  const location = await createLocationRepository({
+    ...locationData,
+    created_by_id: user_id,
   });
+  return location;
 };
 
 export const getLocationsServices = async (query: {
@@ -32,13 +30,11 @@ export const getLocationsServices = async (query: {
 }) => {
   const limit = query.limit ? parseInt(query.limit, 10) : 10;
   const offset = query.page ? (parseInt(query.page, 10) - 1) * limit : 0;
-  return await sequelize.transaction(async (t) => {
-    return await getLocationsRepository({
-      search: query.search,
-      limit,
-      offset,
-      status: query.status as "active" | "inactive" | undefined,
-    });
+  return await getLocationsRepository({
+    search: query.search,
+    limit,
+    offset,
+    status: query.status as "active" | "inactive" | undefined,
   });
 };
 
@@ -49,16 +45,12 @@ export const updateLocationService = async (locationData: {
   longitude?: string;
   google_maps_url?: string;
 }) => {
-  return await sequelize.transaction(async (t) => {
-    const location = await updateLocationRepository(locationData, t);
-    return location;
-  });
+  const location = await updateLocationRepository(locationData);
+  return location;
 };
 
 export const getLocationByIdService = async (location_id: string) => {
-  return await sequelize.transaction(async (t) => {
-    return await getLocationByIdRepository(location_id);
-  });
+  return await getLocationByIdRepository(location_id);
 };
 
 export const getActiveLocationsService = async (query: {
@@ -68,12 +60,10 @@ export const getActiveLocationsService = async (query: {
 }) => {
   const limit = query.limit ? parseInt(query.limit, 10) : 10;
   const offset = query.page ? (parseInt(query.page, 10) - 1) * limit : 0;
-  return await sequelize.transaction(async (t) => {
-    return await getLocationsRepository({
-      status: "active",
-      limit,
-      offset,
-      search: query.search,
-    });
+  return await getLocationsRepository({
+    status: "active",
+    limit,
+    offset,
+    search: query.search,
   });
 };
