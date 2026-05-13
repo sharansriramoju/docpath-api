@@ -55,10 +55,10 @@ app.use(
     resave: false,
     saveUninitialized: false,
     cookie: {
-      httpOnly: process.env.DC_HTTP_ONLY === "true",
-      secure: process.env.DC_SECURE_COOKIE === "true",
+      httpOnly: process.env.HA_HTTP_ONLY === "true",
+      secure: process.env.HA_SECURE_COOKIE === "true",
       sameSite:
-        (process.env.DC_COOKIE_SAME_SITE as "lax" | "strict" | "none") || "lax",
+        (process.env.HA_COOKIE_SAME_SITE as "lax" | "strict" | "none") || "lax",
       maxAge: 2592000000, // 30 days
     },
   }),

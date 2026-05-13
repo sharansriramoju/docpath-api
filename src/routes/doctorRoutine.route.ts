@@ -3,9 +3,16 @@ import {
   authorize,
   isAuthenticated,
   validate,
+  validateQuery,
 } from "../middlewares/index.middleware";
-import { addDoctorRoutineValidation } from "../validations/doctorRoutine.validation";
-import { addDoctorRoutineController } from "../controller/doctorRoutine.controller";
+import {
+  addDoctorRoutineValidation,
+  getDoctorRoutineValidation,
+} from "../validations/doctorRoutine.validation";
+import {
+  addDoctorRoutineController,
+  getDoctorRoutineController,
+} from "../controller/doctorRoutine.controller";
 
 export default (router: Router) => {
   router.post(
@@ -15,5 +22,11 @@ export default (router: Router) => {
     validate(addDoctorRoutineValidation),
     addDoctorRoutineController,
   );
-  // router.get("/docto");
+  router.get(
+    "/doctor-routine",
+    isAuthenticated,
+    authorize("read", "DoctorRoutine"),
+    validateQuery(getDoctorRoutineValidation),
+    getDoctorRoutineController,
+  );
 };
