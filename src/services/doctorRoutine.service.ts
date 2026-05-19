@@ -5,7 +5,6 @@ import {
   updateDoctorRoutineRepository,
 } from "../database/repositories/doctorRoutine.repository";
 import { getDoctorByUserIdRepository } from "../database/repositories/users.repository";
-import sequelize from "../database/sequelize";
 
 export const addDoctorRoutineService = async (
   data: {
