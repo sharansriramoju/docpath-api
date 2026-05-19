@@ -1,5 +1,6 @@
-import { Op, Sequelize, Transaction } from "sequelize";
+import { Op, Sequelize, Transaction, where } from "sequelize";
 import { DoctorRoutine } from "../models";
+import { NotFoundError } from "../../errors/NotFoundError";
 
 export const addDoctorRoutineRepository = async (
   data: {
@@ -60,4 +61,27 @@ export const getDoctorRoutineRepository = async (
     where: whereCaluse,
     transaction: t,
   });
+};
+
+export const updateDoctorRoutineRepository = async (
+  routine_id: string,
+  data: {
+    index?: number;
+    day_of_week?: number;
+    start_time?: string;
+    end_time?: string;
+    location_id?: string;
+    is_active?: boolean;
+  },
+  t?: Transaction,
+) => {
+  const [affectedCount, updatedLocation] = await DoctorRoutine.update(data, {
+    where: { routine_id },
+    transaction: t,
+    returning: true,
+  });
+  if (affectedCount === 0) {
+    throw new NotFoundError("Routine Not Found");
+  }
+  return updatedLocation[0];
 };

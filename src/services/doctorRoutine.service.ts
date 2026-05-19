@@ -2,6 +2,7 @@ import { ForbiddenError, subject } from "@casl/ability";
 import {
   addDoctorRoutineRepository,
   getDoctorRoutineRepository,
+  updateDoctorRoutineRepository,
 } from "../database/repositories/doctorRoutine.repository";
 import { getDoctorByUserIdRepository } from "../database/repositories/users.repository";
 import sequelize from "../database/sequelize";
@@ -61,4 +62,31 @@ export const getDoctorRoutineService = async (
       ? JSON.parse(query.location_ids)
       : undefined,
   });
+};
+
+export const updateDoctorRoutineService = async (
+  routine_id: string,
+  doctor_id: string,
+  data: {
+    index?: number;
+    day_of_week?: number;
+    start_time?: string;
+    end_time?: string;
+    location_id?: string;
+    is_active?: boolean;
+  },
+  not_self: boolean,
+  userAbility: any,
+) => {
+  const doctor = await getDoctorByUserIdRepository(doctor_id);
+  if (!doctor) {
+    throw new Error("Doctor not found");
+  }
+  if (not_self) {
+    ForbiddenError.from(userAbility).throwUnlessCan(
+      "read",
+      subject("DoctorRoutine", doctor),
+    );
+  }
+  return await updateDoctorRoutineRepository(routine_id, data);
 };

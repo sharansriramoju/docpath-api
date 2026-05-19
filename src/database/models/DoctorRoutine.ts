@@ -9,6 +9,7 @@ interface DoctorRoutineAttributes {
   start_time: string;
   end_time: string;
   location_id: string;
+  is_active?: boolean;
   created_by_id: string;
   created_at?: Date;
 }
@@ -29,6 +30,7 @@ class DoctorRoutine
   public start_time!: string;
   public end_time!: string;
   public location_id!: string;
+  public is_active?: boolean;
   public created_by_id!: string;
   public created_at?: Date;
 }
@@ -72,6 +74,11 @@ DoctorRoutine.init(
         model: "locations",
         key: "location_id",
       },
+    },
+    is_active: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: true,
     },
     created_by_id: {
       type: DataTypes.UUID,

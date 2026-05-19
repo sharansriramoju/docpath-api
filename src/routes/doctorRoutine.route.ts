@@ -8,10 +8,12 @@ import {
 import {
   addDoctorRoutineValidation,
   getDoctorRoutineValidation,
+  updateDoctorRoutineValidation,
 } from "../validations/doctorRoutine.validation";
 import {
   addDoctorRoutineController,
   getDoctorRoutineController,
+  updateDoctorRoutineController,
 } from "../controller/doctorRoutine.controller";
 
 export default (router: Router) => {
@@ -28,5 +30,12 @@ export default (router: Router) => {
     authorize("read", "DoctorRoutine"),
     validateQuery(getDoctorRoutineValidation),
     getDoctorRoutineController,
+  );
+  router.put(
+    "/doctor-routine/:doctor_id/:routine_id",
+    isAuthenticated,
+    authorize("update", "DoctorRoutine"),
+    validate(updateDoctorRoutineValidation),
+    updateDoctorRoutineController,
   );
 };
