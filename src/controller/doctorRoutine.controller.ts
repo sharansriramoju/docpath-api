@@ -28,7 +28,6 @@ export const getDoctorRoutineController = asyncHandler(
       ? req.query.doctor_id
       : req.session.user.user_id;
     const not_self = req.query.doctor_id ? true : false;
-    console.log("not self :", not_self);
     const abilty = req.session.ability;
     const routine = await getDoctorRoutineService(
       doctor_id,

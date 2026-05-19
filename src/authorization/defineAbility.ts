@@ -5,10 +5,8 @@ export function defineAbilityFor(user: any) {
 
   // Super admin
   for (const perm of user.permissions) {
-    console.log("defining ability for permission", perm);
     if (perm.RolePermission.scope === "LIMITED") {
       if (perm.subject === "DoctorRoutine") {
-        console.log("defining ability for limited scope", perm);
         can(perm.action, perm.subject, { reporting_doctor_id: user.user_id });
       }
     } else {

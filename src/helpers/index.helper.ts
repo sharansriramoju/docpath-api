@@ -158,7 +158,6 @@ export const sendEmailUsingMailGun = async (
 ) => {
   if (process.env.IS_EMAILS_ENABLED === "true") {
     try {
-      console.log("Sending email using MailGun to:", to_emails);
       const mailgun = new Mailgun(formData);
       const mg = mailgun.client({
         username: "api",
