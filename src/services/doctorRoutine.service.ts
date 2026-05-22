@@ -37,6 +37,8 @@ export const getDoctorRoutineService = async (
     index?: string;
     day_of_week?: string;
     location_ids?: string;
+    page?: string;
+    limit?: string;
   },
   userAbility: any,
   not_self: boolean,
@@ -51,7 +53,12 @@ export const getDoctorRoutineService = async (
       subject("DoctorRoutine", doctor),
     );
   }
+  const limit = query.limit ? parseInt(query.limit) : 10;
+  const offset = query.page ? (parseInt(query.page, 10) - 1) * limit : 0;
+
   return await getDoctorRoutineRepository(doctor_id, {
+    limit,
+    offset,
     index: query.index ? parseInt(query.index) : undefined,
     day_of_week: query.day_of_week ? parseInt(query.day_of_week) : undefined,
     location_ids: query.location_ids

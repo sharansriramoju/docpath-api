@@ -3,7 +3,7 @@ import { sequelize } from "./models/index";
 
 export const seeder = new Umzug({
   migrations: {
-    glob: "src/database/seeders/*.ts",
+    glob: "src/database/seeders/0001-roles.ts",
   },
   context: sequelize.getQueryInterface(),
   storage: new SequelizeStorage({

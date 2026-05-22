@@ -26,7 +26,7 @@ passport.use(
   }),
 );
 
-export const isAuthenticated = async (
+export const isAuthenticated = (
   req: express.Request,
   res: express.Response,
   next: express.NextFunction,
@@ -34,7 +34,7 @@ export const isAuthenticated = async (
   passport.authenticate(
     "jwt",
     { session: false },
-    async (err: any, user: any, info: any) => {
+    (err: any, user: any, info: any) => {
       if (err || !user) {
         return res.status(401).json({ message: "Unauthorized" });
       }

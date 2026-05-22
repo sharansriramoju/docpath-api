@@ -21,6 +21,8 @@ export const addDoctorRoutineRepository = async (
 export const getDoctorRoutineRepository = async (
   doctor_id: string,
   query: {
+    offset: number;
+    limit: number;
     index?: number;
     day_of_week?: number;
     location_ids?: string[];
@@ -60,6 +62,8 @@ export const getDoctorRoutineRepository = async (
     },
     where: whereCaluse,
     transaction: t,
+    limit: query.limit,
+    offset: query.offset,
   });
 };
 

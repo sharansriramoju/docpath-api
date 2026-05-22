@@ -31,6 +31,8 @@ export const getDoctorRoutineValidation = z.object({
       "Invalid location ids",
     )
     .optional(),
+  limit: z.string().regex(/^\d+$/, "Limit must be a numeric string").optional(),
+  page: z.string().regex(/^\d+$/, "Page must be a numeric string").optional(),
 });
 
 export const updateDoctorRoutineValidation = z
