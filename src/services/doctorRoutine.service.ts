@@ -49,6 +49,7 @@ export const getDoctorRoutineService = async (
     throw new Error("Doctor not found");
   }
   if (not_self) {
+    console.log("Not self, checking permissions for doctor_id:", doctor_id);
     ForbiddenError.from(userAbility).throwUnlessCan(
       "read",
       subject("DoctorRoutine", doctor),

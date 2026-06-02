@@ -24,8 +24,18 @@ export const createLocationController = asyncHandler(
 
 export const getLocationsController = asyncHandler(
   async (req: Request, res: Response) => {
-    // Implement logic to fetch locations here
-    const locations = await getLocationsServices(req.query);
+    const ability = req.session.ability;
+    const rules = ability.rulesFor("read", "Locations");
+
+    const forced = rules.reduce(
+      (acc: any, rule: any) =>
+        rule.conditions ? { ...acc, ...rule.conditions } : acc,
+      {} as Record<string, any>,
+    );
+
+    const query = { ...req.query, ...forced };
+
+    const locations = await getLocationsServices(query);
     return res.status(200).json({
       success: true,
       data: locations,

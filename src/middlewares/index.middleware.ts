@@ -101,7 +101,8 @@ export function authorize(action: string, subject: string) {
       ForbiddenError.from(ability).throwUnlessCan(action, subject);
 
       return next();
-    } catch (error) {
+    } catch (error: any) {
+      console.error("Authorization error:", error.message);
       return next(error);
     }
   };

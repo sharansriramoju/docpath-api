@@ -8,8 +8,7 @@ export function defineAbilityFor(user: any) {
     if (perm.RolePermission.scope === "LIMITED") {
       if (perm.subject === "DoctorRoutine") {
         can(perm.action, perm.subject, { reporting_doctor_id: user.user_id });
-      }
-      if (perm.subject === "Location" && perm.action === "read") {
+      } else if (perm.subject === "Locations" && perm.action === "read") {
         can(perm.action, perm.subject, { status: "active" });
       }
     } else {
