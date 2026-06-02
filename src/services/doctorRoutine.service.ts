@@ -1,6 +1,7 @@
 import { ForbiddenError, subject } from "@casl/ability";
 import {
   addDoctorRoutineRepository,
+  getDoctorRoutineByIdRepository,
   getDoctorRoutineRepository,
   updateDoctorRoutineRepository,
 } from "../database/repositories/doctorRoutine.repository";
@@ -65,6 +66,25 @@ export const getDoctorRoutineService = async (
       ? JSON.parse(query.location_ids)
       : undefined,
   });
+};
+
+export const getDoctorRoutineByIdService = async (
+  routine_id: string,
+  doctor_id: string,
+  not_self: boolean,
+  userAbility: any,
+) => {
+  const doctor = await getDoctorByUserIdRepository(doctor_id);
+  if (!doctor) {
+    throw new Error("Doctor not found");
+  }
+  if (not_self) {
+    ForbiddenError.from(userAbility).throwUnlessCan(
+      "read",
+      subject("DoctorRoutine", doctor),
+    );
+  }
+  return await getDoctorRoutineByIdRepository(routine_id);
 };
 
 export const updateDoctorRoutineService = async (

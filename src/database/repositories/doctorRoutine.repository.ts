@@ -1,5 +1,5 @@
-import { Op, Sequelize, Transaction, where } from "sequelize";
-import { DoctorRoutine } from "../models";
+import { Op, Sequelize, Transaction } from "sequelize";
+import { DoctorRoutine, Location } from "../models";
 import { NotFoundError } from "../../errors/NotFoundError";
 
 export const addDoctorRoutineRepository = async (
@@ -29,11 +29,11 @@ export const getDoctorRoutineRepository = async (
   },
   t?: Transaction,
 ) => {
-  let whereCaluse: any = { doctor_id };
+  let whereCaluse: any = { doctor_id, "$location.status$": "active" };
   if (query.index) {
     whereCaluse.index = query.index;
   }
-  if (query.day_of_week) {
+  if (query.day_of_week !== undefined) {
     whereCaluse.day_of_week = query.day_of_week;
   }
   if (query.location_ids && query.location_ids.length > 0) {
@@ -60,11 +60,55 @@ export const getDoctorRoutineRepository = async (
         ],
       ],
     },
+    include: [
+      {
+        model: Location,
+        as: "location",
+        attributes: ["location_id", "name"],
+      },
+    ],
+
     where: whereCaluse,
     transaction: t,
     limit: query.limit,
     offset: query.offset,
   });
+};
+
+export const getDoctorRoutineByIdRepository = async (
+  routine_id: string,
+  t?: Transaction,
+) => {
+  const doctorRoutine = await DoctorRoutine.findOne({
+    where: { routine_id },
+    attributes: {
+      include: [
+        [
+          Sequelize.literal(`
+            CASE "DoctorRoutine"."day_of_week"
+              WHEN 0 THEN 'monday'
+              WHEN 1 THEN 'tuesday'
+              WHEN 2 THEN 'wednesday'
+              WHEN 3 THEN 'thursday'
+              WHEN 4 THEN 'friday'
+              WHEN 5 THEN 'saturday'
+              WHEN 6 THEN 'sunday'
+            END
+          `),
+          "day",
+        ],
+      ],
+    },
+    include: [
+      {
+        model: Location,
+        as: "location",
+        attributes: ["location_id", "name"],
+      },
+    ],
+    transaction: t,
+  });
+  return doctorRoutine;
 };
 
 export const updateDoctorRoutineRepository = async (

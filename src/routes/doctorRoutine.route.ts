@@ -12,6 +12,7 @@ import {
 } from "../validations/doctorRoutine.validation";
 import {
   addDoctorRoutineController,
+  getDoctorRoutineByIdController,
   getDoctorRoutineController,
   updateDoctorRoutineController,
 } from "../controller/doctorRoutine.controller";
@@ -30,6 +31,12 @@ export default (router: Router) => {
     authorize("read", "DoctorRoutine"),
     validateQuery(getDoctorRoutineValidation),
     getDoctorRoutineController,
+  );
+  router.get(
+    "/doctor-routine/:doctor_id/:routine_id",
+    isAuthenticated,
+    authorize("read", "DoctorRoutine"),
+    getDoctorRoutineByIdController,
   );
   router.put(
     "/doctor-routine/:doctor_id/:routine_id",
