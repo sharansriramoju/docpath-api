@@ -1,4 +1,3 @@
-import { sequelize } from "../database/models";
 import {
   createLocationRepository,
   getLocationByIdRepository,
