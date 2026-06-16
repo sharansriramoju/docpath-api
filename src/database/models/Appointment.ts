@@ -6,14 +6,14 @@ interface AppointmentAttributes {
   patient_id: string;
   doctor_id: string;
   location_id: string;
-  date: Date;
+  date: string;
   start_time: string;
   end_time: string;
   doctor_notes?: string;
   prescription?: string;
   created_at?: Date;
   created_by_id: string;
-  status: "scheduled" | "completed" | "cancelled";
+  status?: "scheduled" | "completed" | "cancelled";
 }
 
 interface AppointmentCreationAttributes extends Optional<
@@ -29,7 +29,7 @@ class Appointment
   public patient_id!: string;
   public doctor_id!: string;
   public location_id!: string;
-  public date!: Date;
+  public date!: string;
   public start_time!: string;
   public end_time!: string;
   public doctor_notes?: string;

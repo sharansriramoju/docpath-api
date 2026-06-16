@@ -1,9 +1,6 @@
 // src/middlewares/error.middleware.ts
 import { Request, Response, NextFunction } from "express";
 import { ApiError } from "../errors/ApiError";
-// import { ValidationError } from "../errors/ValidationError";
-// import { ConflictError } from "../errors/ConflictError";
-// import { NotFoundError } from "../errors/NotFoundError";
 import { UniqueConstraintError, ForeignKeyConstraintError } from "sequelize";
 import { ForbiddenError } from "@casl/ability";
 
@@ -13,7 +10,7 @@ export const globalErrorHandler = (
   res: Response,
   next: NextFunction,
 ) => {
-  let statusCode = 500;
+  let status_code = 500;
   let message = "Internal Server Error";
   let details: any = undefined;
 
@@ -21,14 +18,14 @@ export const globalErrorHandler = (
    * Custom application errors
    */
   if (err instanceof ApiError) {
-    statusCode = err.statusCode;
+    status_code = err.status_code;
     message = err.message;
     details = (err as any).details;
   } else if (err.name === "SequelizeValidationError") {
     /**
      * Sequelize validation
      */
-    statusCode = 400;
+    status_code = 400;
     message = "Validation error";
     details = err.errors.map((e: any) => ({
       field: e.path,
@@ -38,7 +35,7 @@ export const globalErrorHandler = (
     /**
      * Unique constraint violation → 409
      */
-    statusCode = 409;
+    status_code = 409;
     message = "Resource already exists";
     details = err.errors.map((e) => ({
       field: e.path,
@@ -48,20 +45,21 @@ export const globalErrorHandler = (
     /**
      * Foreign key violation → 404
      */
-    statusCode = 404;
+    status_code = 404;
     message = "Referenced resource not found";
   } else if (err instanceof ForbiddenError) {
-    statusCode = 403;
+    status_code = 403;
     message = "Forbidden";
+    details = err.message;
   }
-  if (statusCode === 500) {
+  if (status_code === 500) {
     /**
      * Log only unexpected errors
      */
     console.error("UNEXPECTED ERROR:", err);
   }
 
-  return res.status(statusCode).json({
+  return res.status(status_code).json({
     success: false,
     message,
     ...(details && { details }),

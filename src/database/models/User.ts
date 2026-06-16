@@ -12,7 +12,6 @@ interface UserAttributes {
   profile_image_url?: string;
   created_at?: Date;
   updated_at?: Date;
-  reporting_doctor_id?: string;
   hashed_email?: Buffer;
   hashed_phone: Buffer;
 }
@@ -26,7 +25,6 @@ interface UserCreationAttributes extends Optional<
   | "role_id"
   | "profile_image_url"
   | "hashed_email"
-  | "reporting_doctor_id"
 > {}
 
 class User
@@ -95,14 +93,6 @@ User.init(
     profile_image_url: {
       type: DataTypes.TEXT,
       allowNull: true,
-    },
-    reporting_doctor_id: {
-      type: DataTypes.UUID,
-      allowNull: true,
-      references: {
-        model: "users",
-        key: "user_id",
-      },
     },
     updated_at: {
       type: DataTypes.DATE,

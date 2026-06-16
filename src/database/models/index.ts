@@ -11,6 +11,8 @@ import DoctorSchedule from "./DoctorSchedule";
 import Otp from "./Otp";
 import RolePermission from "./RolePermission";
 import Permission from "./Permission";
+import UserLocation from "./UserLocation";
+import ReportingDoctor from "./ReportingDoctor";
 
 // User-Role Associations
 Role.hasMany(User, { foreignKey: "role_id", as: "users" });
@@ -275,18 +277,96 @@ Permission.belongsToMany(User, {
   constraints: false,
 });
 
-// reporting_doctor_id Associations
-User.belongsTo(User, {
-  foreignKey: "reporting_doctor_id",
-  as: "reporting_doctor",
-  onDelete: "SET NULL",
+// User Location Associations
+
+User.belongsToMany(Location, {
+  through: UserLocation,
+  foreignKey: "user_id",
+  otherKey: "location_id",
+  as: "locations",
+  onDelete: "CASCADE",
   onUpdate: "CASCADE",
 });
 
-User.hasMany(User, {
-  foreignKey: "reporting_doctor_id",
-  as: "reporting_patients",
-  onDelete: "SET NULL",
+Location.belongsToMany(User, {
+  through: UserLocation,
+  foreignKey: "location_id",
+  otherKey: "user_id",
+  as: "users",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+
+UserLocation.belongsTo(Location, {
+  foreignKey: "location_id",
+  as: "location",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+
+UserLocation.belongsTo(User, {
+  foreignKey: "user_id",
+  as: "user",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+
+User.hasMany(UserLocation, {
+  foreignKey: "user_id",
+  as: "user_locations",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+
+Location.hasMany(UserLocation, {
+  foreignKey: "location_id",
+  as: "location_users",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+
+ReportingDoctor.belongsTo(User, {
+  foreignKey: "doctor_id",
+  as: "doctor",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+ReportingDoctor.belongsTo(User, {
+  foreignKey: "user_id",
+  as: "user",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+
+User.hasMany(ReportingDoctor, {
+  foreignKey: "doctor_id",
+  as: "reporting_doctors_as_doctor",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+
+User.hasMany(ReportingDoctor, {
+  foreignKey: "user_id",
+  as: "reporting_doctors_as_user",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+
+User.belongsToMany(User, {
+  through: ReportingDoctor,
+  as: "reporting_doctors",
+  foreignKey: "user_id",
+  otherKey: "doctor_id",
+  onDelete: "CASCADE",
+  onUpdate: "CASCADE",
+});
+
+User.belongsToMany(User, {
+  through: ReportingDoctor,
+  as: "reported_users",
+  foreignKey: "doctor_id",
+  otherKey: "user_id",
+  onDelete: "CASCADE",
   onUpdate: "CASCADE",
 });
 
@@ -302,4 +382,6 @@ export {
   DoctorRoutine,
   PatientDiagnostic,
   Otp,
+  UserLocation,
+  ReportingDoctor,
 };

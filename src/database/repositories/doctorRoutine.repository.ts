@@ -14,8 +14,8 @@ export const addDoctorRoutineRepository = async (
   },
   t?: Transaction,
 ) => {
-  const doctorRoutine = await DoctorRoutine.create(data, { transaction: t });
-  return doctorRoutine.dataValues;
+  const doctor_routine = await DoctorRoutine.create(data, { transaction: t });
+  return doctor_routine.dataValues;
 };
 
 export const getDoctorRoutineRepository = async (
@@ -29,16 +29,16 @@ export const getDoctorRoutineRepository = async (
   },
   t?: Transaction,
 ) => {
-  let whereCaluse: any = { doctor_id, "$location.status$": "active" };
+  let where_clause: any = { doctor_id, "$location.status$": "active" };
   if (query.index) {
-    whereCaluse.index = query.index;
+    where_clause.index = query.index;
   }
   if (query.day_of_week !== undefined) {
-    whereCaluse.day_of_week = query.day_of_week;
+    where_clause.day_of_week = query.day_of_week;
   }
   if (query.location_ids && query.location_ids.length > 0) {
-    whereCaluse.location_id = {};
-    whereCaluse.location_id[Op.in] = query.location_ids;
+    where_clause.location_id = {};
+    where_clause.location_id[Op.in] = query.location_ids;
   }
 
   return await DoctorRoutine.findAndCountAll({
@@ -47,13 +47,13 @@ export const getDoctorRoutineRepository = async (
         [
           Sequelize.literal(`
             CASE "DoctorRoutine"."day_of_week"
-              WHEN 0 THEN 'monday'
-              WHEN 1 THEN 'tuesday'
-              WHEN 2 THEN 'wednesday'
-              WHEN 3 THEN 'thursday'
-              WHEN 4 THEN 'friday'
-              WHEN 5 THEN 'saturday'
-              WHEN 6 THEN 'sunday'
+            WHEN 0 THEN 'sunday'
+              WHEN 1 THEN 'monday'
+              WHEN 2 THEN 'tuesday'
+              WHEN 3 THEN 'wednesday'
+              WHEN 4 THEN 'thursday'
+              WHEN 5 THEN 'friday'
+              WHEN 6 THEN 'saturday'
             END
           `),
           "day",
@@ -68,7 +68,7 @@ export const getDoctorRoutineRepository = async (
       },
     ],
 
-    where: whereCaluse,
+    where: where_clause,
     transaction: t,
     limit: query.limit,
     offset: query.offset,
@@ -79,20 +79,20 @@ export const getDoctorRoutineByIdRepository = async (
   routine_id: string,
   t?: Transaction,
 ) => {
-  const doctorRoutine = await DoctorRoutine.findOne({
+  const doctor_routine = await DoctorRoutine.findOne({
     where: { routine_id },
     attributes: {
       include: [
         [
           Sequelize.literal(`
             CASE "DoctorRoutine"."day_of_week"
-              WHEN 0 THEN 'monday'
-              WHEN 1 THEN 'tuesday'
-              WHEN 2 THEN 'wednesday'
-              WHEN 3 THEN 'thursday'
-              WHEN 4 THEN 'friday'
-              WHEN 5 THEN 'saturday'
-              WHEN 6 THEN 'sunday'
+              WHEN 1 THEN 'monday'
+              WHEN 2 THEN 'tuesday'
+              WHEN 3 THEN 'wednesday'
+              WHEN 4 THEN 'thursday'
+              WHEN 5 THEN 'friday'
+              WHEN 6 THEN 'saturday'
+              WHEN 0 THEN 'sunday'
             END
           `),
           "day",
@@ -108,7 +108,7 @@ export const getDoctorRoutineByIdRepository = async (
     ],
     transaction: t,
   });
-  return doctorRoutine;
+  return doctor_routine;
 };
 
 export const updateDoctorRoutineRepository = async (
@@ -123,13 +123,13 @@ export const updateDoctorRoutineRepository = async (
   },
   t?: Transaction,
 ) => {
-  const [affectedCount, updatedLocation] = await DoctorRoutine.update(data, {
+  const [affected_count, updated_location] = await DoctorRoutine.update(data, {
     where: { routine_id },
     transaction: t,
     returning: true,
   });
-  if (affectedCount === 0) {
+  if (affected_count === 0) {
     throw new NotFoundError("Routine Not Found");
   }
-  return updatedLocation[0];
+  return updated_location[0];
 };

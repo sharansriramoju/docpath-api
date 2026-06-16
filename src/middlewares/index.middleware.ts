@@ -5,7 +5,7 @@ import "dotenv/config";
 import { ForbiddenError } from "@casl/ability";
 import { defineAbilityFor } from "../authorization/defineAbility";
 
-const jwtSecret = process.env.HA_JWT_SECRET as string;
+const jwt_secret = process.env.HA_JWT_SECRET as string;
 
 // Custom function to extract JWT from cookies
 const extractJWTFromCookie = (req: express.Request) => {
@@ -15,14 +15,14 @@ const extractJWTFromCookie = (req: express.Request) => {
   return null;
 };
 
-const jwtOptions = {
+const jwt_options = {
   jwtFromRequest: ExtractJwt.fromExtractors([extractJWTFromCookie]), // Custom extractor
-  secretOrKey: jwtSecret,
+  secretOrKey: jwt_secret,
 };
 
 passport.use(
-  new JwtStrategy(jwtOptions, (jwtPayload, done) => {
-    return done(null, jwtPayload);
+  new JwtStrategy(jwt_options, (jwt_payload, done) => {
+    return done(null, jwt_payload);
   }),
 );
 

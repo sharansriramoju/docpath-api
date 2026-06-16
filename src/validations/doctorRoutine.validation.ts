@@ -1,6 +1,6 @@
 import z from "zod";
 
-export const addDoctorRoutineValidation = z
+export const addDoctorRoutineSchema = z
   .object({
     doctor_id: z.uuid(),
     index: z.number().int().min(1).max(6).optional(),
@@ -14,7 +14,7 @@ export const addDoctorRoutineValidation = z
     path: ["end_time"],
   });
 
-export const getDoctorRoutineValidation = z.object({
+export const getDoctorRoutineSchema = z.object({
   doctor_id: z.uuid().optional(),
   index: z
     .string()
@@ -35,7 +35,7 @@ export const getDoctorRoutineValidation = z.object({
   page: z.string().regex(/^\d+$/, "Page must be a numeric string").optional(),
 });
 
-export const updateDoctorRoutineValidation = z
+export const updateDoctorRoutineSchema = z
   .object({
     index: z.number().int().min(1).max(6).optional(),
     day_of_week: z.number().int().min(0).max(6).optional(),

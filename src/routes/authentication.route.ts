@@ -1,8 +1,8 @@
 import { Router } from "express";
 import { isAuthenticated, validate } from "../middlewares/index.middleware";
 import {
-  sendOtpValidation,
-  verifyOtpValidation,
+  sendOtpSchema,
+  verifyOtpSchema,
 } from "../validations/authentication.validation";
 import {
   logoutController,
@@ -13,12 +13,12 @@ import {
 export default (router: Router) => {
   router.post(
     "/send-otp-login",
-    validate(sendOtpValidation),
+    validate(sendOtpSchema),
     sendOtpController,
   );
   router.post(
     "/verify-otp-login",
-    validate(verifyOtpValidation),
+    validate(verifyOtpSchema),
     verifyOtpController,
   );
   router.post("/logout", isAuthenticated, logoutController);

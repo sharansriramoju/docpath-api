@@ -219,9 +219,3 @@ export async function up({ context }: { context: QueryInterface }) {
     },
   ]);
 }
-
-// export async function down({ context }: { context: QueryInterface }) {
-//   await context.bulkDelete("locations", {
-//     role_id: [1, 2, 3],
-//   });
-// }

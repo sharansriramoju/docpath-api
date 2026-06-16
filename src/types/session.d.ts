@@ -5,7 +5,7 @@ declare module "express-session" {
   interface SessionData {
     user?: any;
     ability?: any;
-    samlRequestInfo?: any;
-    relayState?: string;
+    saml_request_info?: any;
+    relay_state?: string;
   }
 }

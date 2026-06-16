@@ -1,10 +1,10 @@
 import z from "zod";
 
-export const sendOtpValidation = z.object({
+export const sendOtpSchema = z.object({
   phone: z.string().min(10, "Phone number must be at least 10 digits"),
 });
 
-export const verifyOtpValidation = z.object({
+export const verifyOtpSchema = z.object({
   phone: z.string().min(10, "Phone number must be at least 10 digits"),
   otp: z
     .string()

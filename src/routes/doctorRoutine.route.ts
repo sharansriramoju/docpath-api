@@ -6,9 +6,9 @@ import {
   validateQuery,
 } from "../middlewares/index.middleware";
 import {
-  addDoctorRoutineValidation,
-  getDoctorRoutineValidation,
-  updateDoctorRoutineValidation,
+  addDoctorRoutineSchema,
+  getDoctorRoutineSchema,
+  updateDoctorRoutineSchema,
 } from "../validations/doctorRoutine.validation";
 import {
   addDoctorRoutineController,
@@ -22,14 +22,14 @@ export default (router: Router) => {
     "/doctor-routine",
     isAuthenticated,
     authorize("create", "DoctorRoutine"),
-    validate(addDoctorRoutineValidation),
+    validate(addDoctorRoutineSchema),
     addDoctorRoutineController,
   );
   router.get(
     "/doctor-routine",
     isAuthenticated,
     authorize("read", "DoctorRoutine"),
-    validateQuery(getDoctorRoutineValidation),
+    validateQuery(getDoctorRoutineSchema),
     getDoctorRoutineController,
   );
   router.get(
@@ -42,7 +42,7 @@ export default (router: Router) => {
     "/doctor-routine/:doctor_id/:routine_id",
     isAuthenticated,
     authorize("update", "DoctorRoutine"),
-    validate(updateDoctorRoutineValidation),
+    validate(updateDoctorRoutineSchema),
     updateDoctorRoutineController,
   );
 };

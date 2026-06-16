@@ -17,16 +17,16 @@ export const addDoctorRoutineService = async (
     location_id: string;
     created_by_id: string;
   },
-  userAbility: any,
+  user_ability: any,
 ) => {
   if (data.doctor_id !== data.created_by_id) {
     const doctor = await getDoctorByUserIdRepository(data.doctor_id);
     if (!doctor) {
       throw new Error("Doctor not found");
     }
-    ForbiddenError.from(userAbility).throwUnlessCan(
+    ForbiddenError.from(user_ability).throwUnlessCan(
       "create",
-      subject("DoctorRoutine", doctor),
+      subject("DoctorRoutine", { ...doctor, doctor_id: doctor.user_id }),
     );
   }
   return await addDoctorRoutineRepository(data);
@@ -41,7 +41,7 @@ export const getDoctorRoutineService = async (
     page?: string;
     limit?: string;
   },
-  userAbility: any,
+  user_ability: any,
   not_self: boolean,
 ) => {
   const doctor = await getDoctorByUserIdRepository(doctor_id);
@@ -50,9 +50,9 @@ export const getDoctorRoutineService = async (
   }
   if (not_self) {
     console.log("Not self, checking permissions for doctor_id:", doctor_id);
-    ForbiddenError.from(userAbility).throwUnlessCan(
+    ForbiddenError.from(user_ability).throwUnlessCan(
       "read",
-      subject("DoctorRoutine", doctor),
+      subject("DoctorRoutine", { ...doctor, doctor_id: doctor.user_id }),
     );
   }
   const limit = query.limit ? parseInt(query.limit) : 10;
@@ -73,16 +73,16 @@ export const getDoctorRoutineByIdService = async (
   routine_id: string,
   doctor_id: string,
   not_self: boolean,
-  userAbility: any,
+  user_ability: any,
 ) => {
   const doctor = await getDoctorByUserIdRepository(doctor_id);
   if (!doctor) {
     throw new Error("Doctor not found");
   }
   if (not_self) {
-    ForbiddenError.from(userAbility).throwUnlessCan(
+    ForbiddenError.from(user_ability).throwUnlessCan(
       "read",
-      subject("DoctorRoutine", doctor),
+      subject("DoctorRoutine", { ...doctor, doctor_id: doctor.user_id }),
     );
   }
   return await getDoctorRoutineByIdRepository(routine_id);
@@ -100,16 +100,16 @@ export const updateDoctorRoutineService = async (
     is_active?: boolean;
   },
   not_self: boolean,
-  userAbility: any,
+  user_ability: any,
 ) => {
   const doctor = await getDoctorByUserIdRepository(doctor_id);
   if (!doctor) {
     throw new Error("Doctor not found");
   }
   if (not_self) {
-    ForbiddenError.from(userAbility).throwUnlessCan(
+    ForbiddenError.from(user_ability).throwUnlessCan(
       "read",
-      subject("DoctorRoutine", doctor),
+      subject("DoctorRoutine", { ...doctor, doctor_id: doctor.user_id }),
     );
   }
   return await updateDoctorRoutineRepository(routine_id, data);
