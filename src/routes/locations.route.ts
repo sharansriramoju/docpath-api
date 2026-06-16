@@ -3,11 +3,13 @@ import {
   authorize,
   isAuthenticated,
   validate,
+  validateParams,
   validateQuery,
 } from "../middlewares/index.middleware";
 import {
   createLocationSchema,
   getLocationsSchema,
+  locationIdParamsSchema,
   updateLocationSchema,
 } from "../validations/locations.validation";
 import {
@@ -43,6 +45,7 @@ export default (router: Router) => {
   router.get(
     "/location/:location_id",
     isAuthenticated,
+    validateParams(locationIdParamsSchema),
     authorize("read", "Locations"),
     getLocationByIdController,
   );

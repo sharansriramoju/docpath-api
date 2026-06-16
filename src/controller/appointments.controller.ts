@@ -1,9 +1,13 @@
 import { Request, Response } from "express";
 import { asyncHandler } from "../middlewares/asyncHandler";
 import {
+  cancelAppointmentService,
   createAppointmentService,
+  getAppointmentNotesService,
   getAppointmentsOverviewService,
   getAppointmentsService,
+  rescheduleAppointmentService,
+  updateAppointmentNotesService,
 } from "../services/appointments.service";
 
 export const createAppointmentController = asyncHandler(
@@ -60,6 +64,71 @@ export const getAppointmentsOverviewController = asyncHandler(
       data,
       message:
         "Successfully retrieved appointment status counts for all locations.",
+    });
+  },
+);
+
+export const updateAppointmentNotesController = asyncHandler(
+  async (req: Request, res: Response) => {
+    const appointment = await updateAppointmentNotesService(
+      req.params.appointment_id as string,
+      {
+        doctor_notes: req.body.doctor_notes,
+        prescription: req.body.prescription,
+      },
+      req.session.ability,
+    );
+    return res.status(200).send({
+      success: true,
+      message: "Successfully updated the appointment notes.",
+      data: appointment,
+    });
+  },
+);
+
+export const getAppointmentNotesController = asyncHandler(
+  async (req: Request, res: Response) => {
+    const data = await getAppointmentNotesService(
+      req.params.appointment_id as string,
+      req.session.ability,
+    );
+    return res.status(200).send({
+      success: true,
+      message: "Successfully retrieved the appointment notes.",
+      data,
+    });
+  },
+);
+
+export const rescheduleAppointmentController = asyncHandler(
+  async (req: Request, res: Response) => {
+    const appointment = await rescheduleAppointmentService(
+      req.params.appointment_id as string,
+      {
+        date: req.body.date,
+        start_time: req.body.start_time,
+        end_time: req.body.end_time,
+      },
+      req.session.ability,
+    );
+    return res.status(200).send({
+      success: true,
+      message: "Successfully rescheduled the appointment.",
+      data: appointment,
+    });
+  },
+);
+
+export const cancelAppointmentController = asyncHandler(
+  async (req: Request, res: Response) => {
+    const appointment = await cancelAppointmentService(
+      req.params.appointment_id as string,
+      req.session.ability,
+    );
+    return res.status(200).send({
+      success: true,
+      message: "Successfully cancelled the appointment.",
+      data: appointment,
     });
   },
 );

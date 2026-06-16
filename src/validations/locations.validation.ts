@@ -1,5 +1,9 @@
 import z from "zod";
 
+export const locationIdParamsSchema = z.object({
+  location_id: z.uuid("location_id must be a valid UUID"),
+});
+
 export const createLocationSchema = z.object({
   name: z.string().min(1, "Name is required"),
   latitude: z.string().optional(),

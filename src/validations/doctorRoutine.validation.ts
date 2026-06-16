@@ -1,5 +1,10 @@
 import z from "zod";
 
+export const doctorRoutineParamsSchema = z.object({
+  doctor_id: z.uuid(),
+  routine_id: z.uuid(),
+});
+
 export const addDoctorRoutineSchema = z
   .object({
     doctor_id: z.uuid(),

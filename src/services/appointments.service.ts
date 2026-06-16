@@ -1,9 +1,11 @@
 import { ForbiddenError, subject } from "@casl/ability";
 import {
   createAppointmentRepository,
+  getAppointmentByIdRepository,
   getAppointmentStatusCountsByLocationRepository,
   getAppointmentsRepository,
   getExistingScheduledAppointmentsAtDateTimeRepository,
+  updateAppointmentRepository,
 } from "../database/repositories/appointments.repository";
 import { getUserWithRoleByIdRepository } from "../database/repositories/users.repository";
 import { ApiError } from "../errors/ApiError";
@@ -65,10 +67,12 @@ export const createAppointmentService = async (
   // concurrent requests cannot both pass the conflict check and double-book.
   return await sequelize.transaction(async (t) => {
     const conflicts = await getExistingScheduledAppointmentsAtDateTimeRepository(
-      appointment_data.doctor_id,
-      appointment_data.date,
-      appointment_data.start_time,
-      appointment_data.end_time,
+      {
+        doctor_id: appointment_data.doctor_id,
+        date: appointment_data.date,
+        start_time: appointment_data.start_time,
+        end_time: appointment_data.end_time,
+      },
       t,
     );
     if (conflicts.length > 0) {
@@ -196,5 +200,126 @@ export const getAppointmentsOverviewService = async (
     start_date,
     end_date,
     location_ids,
+  });
+};
+
+export const updateAppointmentNotesService = async (
+  appointment_id: string,
+  data: { doctor_notes?: string; prescription?: string },
+  user_ability: any,
+) => {
+  const appointment = await getAppointmentByIdRepository(appointment_id);
+  if (!appointment) {
+    throw new ApiError(404, "Appointment not found");
+  }
+
+  ForbiddenError.from(user_ability).throwUnlessCan(
+    "update",
+    subject("Appointments", {
+      location_id: appointment.location_id,
+      doctor_id: appointment.doctor_id,
+    }),
+  );
+
+  return await updateAppointmentRepository(appointment_id, data);
+};
+
+export const getAppointmentNotesService = async (
+  appointment_id: string,
+  user_ability: any,
+) => {
+  const appointment = await getAppointmentByIdRepository(appointment_id);
+  if (!appointment) {
+    throw new ApiError(404, "Appointment not found");
+  }
+
+  ForbiddenError.from(user_ability).throwUnlessCan(
+    "read",
+    subject("Appointments", {
+      location_id: appointment.location_id,
+      doctor_id: appointment.doctor_id,
+    }),
+  );
+
+  return {
+    appointment_id: appointment.appointment_id,
+    doctor_notes: appointment.doctor_notes ?? null,
+    prescription: appointment.prescription ?? null,
+  };
+};
+
+export const rescheduleAppointmentService = async (
+  appointment_id: string,
+  data: { date: string; start_time: string; end_time: string },
+  user_ability: any,
+) => {
+  const appointment = await getAppointmentByIdRepository(appointment_id);
+  if (!appointment) {
+    throw new ApiError(404, "Appointment not found");
+  }
+
+  // Only the appointment's doctor or a user reporting to that doctor may
+  // reschedule it (enforced by the doctor_id condition on the ability rule).
+  ForbiddenError.from(user_ability).throwUnlessCan(
+    "update",
+    subject("Appointments", {
+      location_id: appointment.location_id,
+      doctor_id: appointment.doctor_id,
+    }),
+  );
+
+  if (appointment.status !== "scheduled") {
+    throw new ApiError(400, "Only scheduled appointments can be rescheduled");
+  }
+
+  // Re-check for conflicts in a transaction, ignoring this appointment itself.
+  return await sequelize.transaction(async (t) => {
+    const conflicts = await getExistingScheduledAppointmentsAtDateTimeRepository(
+      {
+        doctor_id: appointment.doctor_id,
+        date: data.date,
+        start_time: data.start_time,
+        end_time: data.end_time,
+        exclude_appointment_id: appointment_id,
+      },
+      t,
+    );
+    if (conflicts.length > 0) {
+      throw new ApiError(
+        409,
+        "The doctor already has an appointment in this time slot",
+      );
+    }
+
+    return await updateAppointmentRepository(appointment_id, data, t);
+  });
+};
+
+export const cancelAppointmentService = async (
+  appointment_id: string,
+  user_ability: any,
+) => {
+  const appointment = await getAppointmentByIdRepository(appointment_id);
+  if (!appointment) {
+    throw new ApiError(404, "Appointment not found");
+  }
+
+  ForbiddenError.from(user_ability).throwUnlessCan(
+    "update",
+    subject("Appointments", {
+      location_id: appointment.location_id,
+      doctor_id: appointment.doctor_id,
+    }),
+  );
+
+  if (appointment.status === "cancelled") {
+    throw new ApiError(400, "Appointment is already cancelled");
+  }
+  if (appointment.status === "completed") {
+    throw new ApiError(400, "A completed appointment cannot be cancelled");
+  }
+
+  return await updateAppointmentRepository(appointment_id, {
+    status: "cancelled",
   });
 };

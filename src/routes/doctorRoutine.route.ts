@@ -3,10 +3,12 @@ import {
   authorize,
   isAuthenticated,
   validate,
+  validateParams,
   validateQuery,
 } from "../middlewares/index.middleware";
 import {
   addDoctorRoutineSchema,
+  doctorRoutineParamsSchema,
   getDoctorRoutineSchema,
   updateDoctorRoutineSchema,
 } from "../validations/doctorRoutine.validation";
@@ -35,12 +37,14 @@ export default (router: Router) => {
   router.get(
     "/doctor-routine/:doctor_id/:routine_id",
     isAuthenticated,
+    validateParams(doctorRoutineParamsSchema),
     authorize("read", "DoctorRoutine"),
     getDoctorRoutineByIdController,
   );
   router.put(
     "/doctor-routine/:doctor_id/:routine_id",
     isAuthenticated,
+    validateParams(doctorRoutineParamsSchema),
     authorize("update", "DoctorRoutine"),
     validate(updateDoctorRoutineSchema),
     updateDoctorRoutineController,

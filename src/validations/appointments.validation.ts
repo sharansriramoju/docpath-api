@@ -64,3 +64,42 @@ export const getAppointmentsOverviewSchema = z
       path: ["week_start"],
     },
   );
+
+export const appointmentIdParamsSchema = z.object({
+  appointment_id: z.uuid(),
+});
+
+export const rescheduleAppointmentSchema = z
+  .object({
+    date: z.string().refine((date) => !isNaN(Date.parse(date)), {
+      message: "Invalid date format",
+    }),
+    start_time: z
+      .string()
+      .refine((time) => /^([0-1]\d|2[0-3]):([0-5]\d)$/.test(time), {
+        message: "Invalid time format, expected HH:mm",
+      }),
+    end_time: z
+      .string()
+      .refine((time) => /^([0-1]\d|2[0-3]):([0-5]\d)$/.test(time), {
+        message: "Invalid time format, expected HH:mm",
+      }),
+  })
+  .refine((data) => data.end_time > data.start_time, {
+    message: "end_time must be after start_time",
+    path: ["end_time"],
+  });
+
+export const updateAppointmentNotesSchema = z
+  .object({
+    doctor_notes: z.string().optional(),
+    prescription: z.string().optional(),
+  })
+  .refine(
+    (data) =>
+      data.doctor_notes !== undefined || data.prescription !== undefined,
+    {
+      message: "At least one of doctor_notes or prescription must be provided",
+      path: ["doctor_notes"],
+    },
+  );

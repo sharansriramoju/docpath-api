@@ -112,24 +112,57 @@ export const getAppointmentStatusCountsByLocationRepository = async (filters: {
   );
 };
 
+export const getAppointmentByIdRepository = async (
+  appointment_id: string,
+  t?: Transaction,
+) => {
+  return await Appointment.findByPk(appointment_id, { transaction: t });
+};
+
+export const updateAppointmentRepository = async (
+  appointment_id: string,
+  data: Partial<{
+    date: string;
+    start_time: string;
+    end_time: string;
+    status: "scheduled" | "completed" | "cancelled";
+    doctor_notes: string;
+    prescription: string;
+  }>,
+  t?: Transaction,
+) => {
+  const [, updated] = await Appointment.update(data, {
+    where: { appointment_id },
+    transaction: t,
+    returning: true,
+  });
+  return updated[0];
+};
+
 export const getExistingScheduledAppointmentsAtDateTimeRepository = async (
-  doctor_id: string,
-  date: string,
-  start_time: string,
-  end_time: string,
+  params: {
+    doctor_id: string;
+    date: string;
+    start_time: string;
+    end_time: string;
+    // Exclude this appointment from the overlap check (used when rescheduling).
+    exclude_appointment_id?: string;
+  },
   t?: Transaction,
 ) => {
   // Two intervals [a_start, a_end) and [b_start, b_end) overlap iff
   // a_start < b_end AND a_end > b_start. This treats times as half-open,
   // so an appointment ending exactly when another starts is NOT a conflict.
-  return await Appointment.findAll({
-    where: {
-      doctor_id,
-      date,
-      status: { [Op.in]: ["scheduled", "completed"] },
-      start_time: { [Op.lt]: end_time },
-      end_time: { [Op.gt]: start_time },
-    },
-    transaction: t,
-  });
+  const where: Record<string, unknown> = {
+    doctor_id: params.doctor_id,
+    date: params.date,
+    status: { [Op.in]: ["scheduled", "completed"] },
+    start_time: { [Op.lt]: params.end_time },
+    end_time: { [Op.gt]: params.start_time },
+  };
+  if (params.exclude_appointment_id) {
+    where.appointment_id = { [Op.ne]: params.exclude_appointment_id };
+  }
+
+  return await Appointment.findAll({ where, transaction: t });
 };

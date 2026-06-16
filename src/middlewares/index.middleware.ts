@@ -50,6 +50,22 @@ export const isAuthenticated = (
   )(req, res, next);
 };
 
+// Allow only users whose role name contains "doctor" (case-insensitive).
+export const isDoctor = (
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction,
+) => {
+  const role_name = req.session.user?.role?.name;
+  if (!role_name || !role_name.toLowerCase().includes("doctor")) {
+    return res.status(403).json({
+      success: false,
+      message: "Only users with a doctor role can perform this action",
+    });
+  }
+  return next();
+};
+
 export const validate =
   (schema: any) =>
   (req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -82,6 +98,24 @@ export const validateQuery =
           JSON.parse(err.message)[0].message +
             " at " +
             JSON.parse(err.message)[0].path || "Invalid query parameters",
+      });
+    }
+  };
+
+export const validateParams =
+  (schema: any) =>
+  (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    try {
+      schema.parse(req.params);
+      next();
+      return;
+    } catch (err: any) {
+      return res.status(400).json({
+        success: false,
+        message:
+          JSON.parse(err.message)[0].message +
+            " at " +
+            JSON.parse(err.message)[0].path || "Invalid route parameters",
       });
     }
   };
