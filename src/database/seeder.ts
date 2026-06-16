@@ -3,7 +3,11 @@ import { sequelize } from "./models/index";
 
 export const seeder = new Umzug({
   migrations: {
-    glob: "src/database/seeders/0001-roles.ts",
+    // Run all seeders except the optional sample-locations data.
+    glob: [
+      "src/database/seeders/*.ts",
+      { ignore: ["**/0002-locations.ts"] },
+    ],
   },
   context: sequelize.getQueryInterface(),
   storage: new SequelizeStorage({
