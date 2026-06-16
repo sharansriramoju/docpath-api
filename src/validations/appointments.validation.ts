@@ -25,7 +25,7 @@ export const createAppointmentSchema = z
   });
 
 export const getAppointmentsSchema = z.object({
-  doctor_id: z.uuid(),
+  doctor_id: z.uuid().optional(),
   location_id: z.uuid(),
   date: z.string().refine((date) => !isNaN(Date.parse(date)), {
     message: "Invalid date format",
