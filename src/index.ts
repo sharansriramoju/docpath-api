@@ -14,6 +14,7 @@ import redisClient, {
 } from "./database/redis";
 import router from "./routes/index.route";
 import { globalErrorHandler } from "./middlewares/error.middleware";
+import { apiRateLimiter } from "./middlewares/rateLimit.middleware";
 
 const port = 3000;
 const host = "0.0.0.0";
@@ -88,7 +89,7 @@ app.get("/health", async (req, res) => {
   res.send("Server is runningasdfasdfasdfa! : " + secret);
 });
 
-app.use("/api", router());
+app.use("/api", apiRateLimiter, router());
 
 app.use(globalErrorHandler);
 
