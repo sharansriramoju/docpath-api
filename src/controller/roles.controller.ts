@@ -22,7 +22,11 @@ export const createRoleController = asyncHandler(
 
 export const getRolesController = asyncHandler(
   async (req: Request, res: Response) => {
-    const roles = await getRolesService();
+    const roles = await getRolesService({
+      search: req.query.search as string | undefined,
+      limit: req.query.limit as string | undefined,
+      page: req.query.page as string | undefined,
+    });
     return res.status(200).send({
       success: true,
       message: "Successfully retrieved the roles.",
@@ -66,7 +70,9 @@ export const deleteRoleController = asyncHandler(
 
 export const getPermissionsController = asyncHandler(
   async (req: Request, res: Response) => {
-    const permissions = await getPermissionsService();
+    const permissions = await getPermissionsService({
+      search: req.query.search as string | undefined,
+    });
     return res.status(200).send({
       success: true,
       message: "Successfully retrieved the permissions.",

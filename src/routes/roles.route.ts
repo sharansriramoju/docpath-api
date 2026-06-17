@@ -4,9 +4,12 @@ import {
   isAuthenticated,
   validate,
   validateParams,
+  validateQuery,
 } from "../middlewares/index.middleware";
 import {
   createRoleSchema,
+  getPermissionsSchema,
+  getRolesSchema,
   roleIdParamsSchema,
   updateRoleSchema,
 } from "../validations/roles.validation";
@@ -25,6 +28,7 @@ export default (router: Router) => {
     "/permissions",
     isAuthenticated,
     authorize("read", "Roles"),
+    validateQuery(getPermissionsSchema),
     getPermissionsController,
   );
 
@@ -39,6 +43,7 @@ export default (router: Router) => {
     "/roles",
     isAuthenticated,
     authorize("read", "Roles"),
+    validateQuery(getRolesSchema),
     getRolesController,
   );
   router.get(

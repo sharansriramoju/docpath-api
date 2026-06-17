@@ -1,11 +1,14 @@
 import { sequelize } from "../database/models";
 import { ApiError } from "../errors/ApiError";
 import {
+  addRolePermissionsRepository,
   createRoleRepository,
   deleteRoleRepository,
+  editRolePermissionRepository,
   getAllPermissionsRepository,
   getRoleByIdRepository,
   getRolesRepository,
+  removeRolePermissionsRepository,
   setRolePermissionsRepository,
   updateRoleRepository,
 } from "../database/repositories/roles.repository";
@@ -33,8 +36,14 @@ export const createRoleService = async (data: {
   });
 };
 
-export const getRolesService = async () => {
-  return await getRolesRepository();
+export const getRolesService = async (query: {
+  search?: string;
+  limit?: string;
+  page?: string;
+}) => {
+  const limit = query.limit ? parseInt(query.limit, 10) : 10;
+  const offset = query.page ? (parseInt(query.page, 10) - 1) * limit : 0;
+  return await getRolesRepository({ search: query.search, limit, offset });
 };
 
 export const getRoleByIdService = async (role_id: number) => {
@@ -50,7 +59,14 @@ export const updateRoleService = async (
   data: {
     name?: string;
     description?: string;
-    permissions?: RolePermissionInput[];
+    add_permissions?: RolePermissionInput[];
+    edit_permissions?: {
+      permission_id: string;
+      new_permission_id?: string;
+      scope?: "ALL" | "LIMITED";
+      conditions?: object | null;
+    }[];
+    remove_permissions?: string[];
   },
 ) => {
   const existing = await getRoleByIdRepository(role_id);
@@ -65,9 +81,33 @@ export const updateRoleService = async (
     if (Object.keys(fields).length > 0) {
       await updateRoleRepository(role_id, fields, t);
     }
-    // A provided permissions array fully replaces the existing mapping.
-    if (data.permissions !== undefined) {
-      await setRolePermissionsRepository(role_id, data.permissions, t);
+    // Order: edits modify existing mappings, then removals, then additions.
+    // For a permission_id present in more than one list, additions win.
+    if (data.edit_permissions && data.edit_permissions.length > 0) {
+      for (const edit of data.edit_permissions) {
+        const affected = await editRolePermissionRepository(
+          role_id,
+          edit.permission_id,
+          {
+            new_permission_id: edit.new_permission_id,
+            scope: edit.scope,
+            conditions: edit.conditions,
+          },
+          t,
+        );
+        if (affected === 0) {
+          throw new ApiError(
+            404,
+            `Permission ${edit.permission_id} is not mapped to this role`,
+          );
+        }
+      }
+    }
+    if (data.remove_permissions && data.remove_permissions.length > 0) {
+      await removeRolePermissionsRepository(role_id, data.remove_permissions, t);
+    }
+    if (data.add_permissions && data.add_permissions.length > 0) {
+      await addRolePermissionsRepository(role_id, data.add_permissions, t);
     }
     return await getRoleByIdRepository(role_id, t);
   });
@@ -84,6 +124,6 @@ export const deleteRoleService = async (role_id: number) => {
   return { role_id };
 };
 
-export const getPermissionsService = async () => {
-  return await getAllPermissionsRepository();
+export const getPermissionsService = async (query: { search?: string }) => {
+  return await getAllPermissionsRepository(query);
 };
