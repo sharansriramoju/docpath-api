@@ -1,4 +1,5 @@
 import crypto from "crypto";
+import AWS from "aws-sdk";
 import "dotenv/config";
 
 const ALGO = "aes-256-gcm";
@@ -62,4 +63,86 @@ export function hashForLookup(value: string) {
     .createHmac("sha256", hmac_key)
     .update(value.toLowerCase().trim())
     .digest(); // Buffer(32)
+}
+
+// --- Blind index for partial (substring) search over encrypted names --- //
+
+const TRIGRAM_SIZE = 3;
+// Truncate each blind-index hash to 64 bits. This shrinks the stored array and
+// the GIN index ~4x; truncation only risks rare extra false positives, which
+// trigram search already tolerates. (Exact phone/email lookups use the full
+// hashForLookup digest and are unaffected.)
+const SEARCH_INDEX_HASH_LENGTH = 16;
+
+const hmac_hex = (value: string): string => {
+  const hmac_key = Buffer.from(process.env.PII_LOOKUP_KEY!, "base64");
+  return crypto
+    .createHmac("sha256", hmac_key)
+    .update(value)
+    .digest("hex")
+    .slice(0, SEARCH_INDEX_HASH_LENGTH);
+};
+
+// Normalize a value to a single lowercase token (whitespace removed) and split
+// it into overlapping trigrams. Trigram containment lets us match an arbitrary
+// substring (>= 3 chars) of the original value.
+const trigrams = (value: string): string[] => {
+  const normalized = value.toLowerCase().replace(/\s+/g, "");
+  const grams: string[] = [];
+  for (let i = 0; i + TRIGRAM_SIZE <= normalized.length; i++) {
+    grams.push(normalized.slice(i, i + TRIGRAM_SIZE));
+  }
+  return grams;
+};
+
+// Build the trigram blind-index terms for a name, stored alongside the
+// encrypted value so the name can be substring-searched without decrypting it.
+export const buildNameSearchIndex = (name: string): string[] => {
+  const terms = new Set<string>();
+  for (const gram of trigrams(name)) {
+    terms.add(hmac_hex(gram));
+  }
+  return [...terms];
+};
+
+// Hash the query's trigrams for matching against a stored index. Queries
+// shorter than the trigram size produce no terms.
+export const hashNameSearchTerms = (query: string): string[] => {
+  const terms = new Set<string>();
+  for (const gram of trigrams(query)) {
+    terms.add(hmac_hex(gram));
+  }
+  return [...terms];
+};
+
+// --- S3 file upload --- //
+
+const s3 = new AWS.S3({
+  accessKeyId: process.env.ACCESS_KEY_ID,
+  secretAccessKey: process.env.SECRET_ACCESS_KEY,
+});
+
+const S3_BUCKET = process.env.S3_BUCKET_NAME!;
+
+export async function uploadFileToS3(
+  file: Express.Multer.File,
+  folder?: string,
+): Promise<{ url: string; key: string }> {
+  const key = folder
+    ? `${folder}/${Date.now()}-${file.originalname}`
+    : `${Date.now()}-${file.originalname}`;
+
+  const params: AWS.S3.PutObjectRequest = {
+    Bucket: S3_BUCKET,
+    Key: key,
+    Body: file.buffer,
+    ContentType: file.mimetype,
+  };
+
+  await s3.upload(params).promise();
+
+  return {
+    url: `https://${S3_BUCKET}.s3.amazonaws.com/${key}`,
+    key,
+  };
 }

@@ -73,6 +73,7 @@ export const updateAppointmentNotesController = asyncHandler(
     const appointment = await updateAppointmentNotesService(
       req.params.appointment_id as string,
       {
+        reason: req.body.reason,
         doctor_notes: req.body.doctor_notes,
         prescription: req.body.prescription,
       },

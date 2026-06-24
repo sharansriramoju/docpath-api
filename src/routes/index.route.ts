@@ -5,6 +5,7 @@ import locationsRoute from "./locations.route";
 import doctorRoutineRoute from "./doctorRoutine.route";
 import appointmentsRoute from "./appointments.route";
 import rolesRoute from "./roles.route";
+import patientsRoute from "./patients.route";
 
 const router = Router();
 
@@ -15,5 +16,6 @@ export default (): Router => {
   doctorRoutineRoute(router);
   appointmentsRoute(router);
   rolesRoute(router);
+  patientsRoute(router);
   return router;
 };

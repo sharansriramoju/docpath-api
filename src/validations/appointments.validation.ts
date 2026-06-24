@@ -1,5 +1,13 @@
 import z from "zod";
 
+// The clinic operates in IST; evaluate "past" against that timezone so a
+// same-day earlier time is correctly rejected regardless of server timezone.
+const IST_OFFSET = "+05:30";
+const isAppointmentInFuture = (date: string, start_time: string): boolean => {
+  const start = new Date(`${date.slice(0, 10)}T${start_time}:00${IST_OFFSET}`);
+  return start.getTime() >= Date.now();
+};
+
 export const createAppointmentSchema = z
   .object({
     patient_id: z.uuid(),
@@ -18,9 +26,18 @@ export const createAppointmentSchema = z
         message: "Invalid time format, expected HH:mm",
       }),
     location_id: z.uuid(),
+    reason: z.string().optional(),
   })
   .refine((data) => data.end_time > data.start_time, {
     message: "end_time must be after start_time",
+    path: ["end_time"],
+  })
+  .refine((data) => isAppointmentInFuture(data.date, data.start_time), {
+    message: "start_time cannot be in the past",
+    path: ["start_time"],
+  })
+  .refine((data) => isAppointmentInFuture(data.date, data.end_time), {
+    message: "end_time cannot be in the past",
     path: ["end_time"],
   });
 
@@ -88,18 +105,30 @@ export const rescheduleAppointmentSchema = z
   .refine((data) => data.end_time > data.start_time, {
     message: "end_time must be after start_time",
     path: ["end_time"],
+  })
+  .refine((data) => isAppointmentInFuture(data.date, data.start_time), {
+    message: "start_time cannot be in the past",
+    path: ["start_time"],
+  })
+  .refine((data) => isAppointmentInFuture(data.date, data.end_time), {
+    message: "end_time cannot be in the past",
+    path: ["end_time"],
   });
 
 export const updateAppointmentNotesSchema = z
   .object({
+    reason: z.string().optional(),
     doctor_notes: z.string().optional(),
     prescription: z.string().optional(),
   })
   .refine(
     (data) =>
-      data.doctor_notes !== undefined || data.prescription !== undefined,
+      data.reason !== undefined ||
+      data.doctor_notes !== undefined ||
+      data.prescription !== undefined,
     {
-      message: "At least one of doctor_notes or prescription must be provided",
+      message:
+        "At least one of reason, doctor_notes or prescription must be provided",
       path: ["doctor_notes"],
     },
   );

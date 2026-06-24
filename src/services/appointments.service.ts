@@ -2,7 +2,7 @@ import { ForbiddenError, subject } from "@casl/ability";
 import {
   createAppointmentRepository,
   getAppointmentByIdRepository,
-  getAppointmentStatusCountsByLocationRepository,
+  getAppointmentOverviewCountsRepository,
   getAppointmentsRepository,
   getExistingScheduledAppointmentsAtDateTimeRepository,
   updateAppointmentRepository,
@@ -11,6 +11,18 @@ import { getUserWithRoleByIdRepository } from "../database/repositories/users.re
 import { ApiError } from "../errors/ApiError";
 import { sequelize } from "../database/models";
 import { decryptPII } from "../helpers/index.helper";
+
+// Inclusive list of "YYYY-MM-DD" date strings between start and end.
+const enumerateDates = (start: string, end: string): string[] => {
+  const dates: string[] = [];
+  const current = new Date(`${start}T00:00:00Z`);
+  const last = new Date(`${end}T00:00:00Z`);
+  while (current <= last) {
+    dates.push(current.toISOString().slice(0, 10));
+    current.setUTCDate(current.getUTCDate() + 1);
+  }
+  return dates;
+};
 
 // Decrypt the PII fields on an included patient record so the dashboard can
 // display readable values (User PII is stored encrypted at rest).
@@ -40,6 +52,7 @@ export const createAppointmentService = async (
     end_time: string;
     location_id: string;
     created_by_id: string;
+    reason?: string;
   },
   user_ability: any,
 ) => {
@@ -131,11 +144,8 @@ export const getAppointmentsOverviewService = async (
 ) => {
   ForbiddenError.from(user_ability).throwUnlessCan("read", "Appointments");
 
-  // When no doctor_id is supplied, show the logged-in doctor's own overview.
-  const doctor_id = query.doctor_id ?? current_user_id;
-
   // Derive the caller's permitted doctors and locations from their ability
-  // rules so the aggregate can only ever count appointments they may read.
+  // rules so the breakdown can only ever count appointments they may read.
   // A rule that does not constrain a field grants unrestricted access to it.
   const rules = user_ability.rulesFor("read", "Appointments");
   let unrestricted_doctors = false;
@@ -162,21 +172,21 @@ export const getAppointmentsOverviewService = async (
     }
   }
 
-  // The caller may only request overviews for doctors they are allowed to read.
+  // The overview is for a single doctor: the one passed in the query, or the
+  // logged-in user when not supplied. The caller must be permitted to read it.
+  const doctor_id = query.doctor_id ?? current_user_id;
   if (!unrestricted_doctors && !allowed_doctor_ids.has(doctor_id)) {
     throw new ApiError(
       403,
       "You are not allowed to view this doctor's appointments",
     );
   }
+  const doctor_ids = [doctor_id];
 
-  // Restrict the aggregate to the caller's permitted locations. If they have
-  // no permitted locations, there is nothing they are allowed to see.
+  // Restrict to the caller's permitted locations.
   let location_ids: string[] | undefined;
   if (!unrestricted_locations) {
-    if (allowed_location_ids.size === 0) {
-      return [];
-    }
+    if (allowed_location_ids.size === 0) return [];
     location_ids = [...allowed_location_ids];
   }
 
@@ -195,17 +205,53 @@ export const getAppointmentsOverviewService = async (
   }
   // view === "all" → no date range, count across all dates.
 
-  return await getAppointmentStatusCountsByLocationRepository({
-    doctor_id,
+  const rows = await getAppointmentOverviewCountsRepository({
     start_date,
     end_date,
+    doctor_ids,
     location_ids,
   });
+
+  // Group the flat per-(date, location) rows under each date. Rows arrive
+  // ordered by date, so Map insertion order keeps the dates ascending.
+  // doctor_name comes back encrypted, so decrypt it here.
+  const totals_by_date = new Map<string, any[]>();
+  for (const row of rows) {
+    if (!totals_by_date.has(row.date)) {
+      totals_by_date.set(row.date, []);
+    }
+    totals_by_date.get(row.date)!.push({
+      location_id: row.location_id,
+      location_name: row.location_name,
+      doctor_id: row.doctor_id,
+      doctor_name: row.doctor_name
+        ? decryptPII(row.doctor_name)
+        : row.doctor_name,
+      pending: row.pending,
+      completed: row.completed,
+      cancelled: row.cancelled,
+      total_scheduled: row.total_scheduled,
+    });
+  }
+
+  // For week/month, include every day in the range with an empty totals array
+  // when there are no appointments. (view "all" has no range to fill.)
+  if (start_date && end_date) {
+    return enumerateDates(start_date, end_date).map((date) => ({
+      date,
+      totals: totals_by_date.get(date) ?? [],
+    }));
+  }
+
+  return [...totals_by_date.entries()].map(([date, totals]) => ({
+    date,
+    totals,
+  }));
 };
 
 export const updateAppointmentNotesService = async (
   appointment_id: string,
-  data: { doctor_notes?: string; prescription?: string },
+  data: { reason?: string; doctor_notes?: string; prescription?: string },
   user_ability: any,
 ) => {
   const appointment = await getAppointmentByIdRepository(appointment_id);
@@ -243,6 +289,7 @@ export const getAppointmentNotesService = async (
 
   return {
     appointment_id: appointment.appointment_id,
+    reason: appointment.reason ?? null,
     doctor_notes: appointment.doctor_notes ?? null,
     prescription: appointment.prescription ?? null,
   };

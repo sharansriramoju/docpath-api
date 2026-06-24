@@ -14,6 +14,7 @@ interface UserAttributes {
   updated_at?: Date;
   hashed_email?: Buffer;
   hashed_phone: Buffer;
+  name_search_index?: string[];
 }
 
 interface UserCreationAttributes extends Optional<
@@ -25,6 +26,7 @@ interface UserCreationAttributes extends Optional<
   | "role_id"
   | "profile_image_url"
   | "hashed_email"
+  | "name_search_index"
 > {}
 
 class User
@@ -41,6 +43,7 @@ class User
   public profile_image_url?: string;
   public hashed_email?: Buffer;
   public hashed_phone!: Buffer;
+  public name_search_index?: string[];
   public reporting_doctor_id?: string;
   public created_at?: Date;
   public updated_at?: Date;
@@ -72,6 +75,11 @@ User.init(
     },
     hashed_email: {
       type: DataTypes.BLOB,
+      allowNull: true,
+    },
+    // Prefix blind-index of the (encrypted) name for partial search.
+    name_search_index: {
+      type: DataTypes.ARRAY(DataTypes.TEXT),
       allowNull: true,
     },
     gender: {
@@ -112,6 +120,14 @@ User.init(
     modelName: "User",
     tableName: "users",
     timestamps: false,
+    indexes: [
+      // GIN index accelerates the `name_search_index @> [...]` trigram search.
+      {
+        name: "users_name_search_index_gin",
+        fields: ["name_search_index"],
+        using: "GIN",
+      },
+    ],
   },
 );
 

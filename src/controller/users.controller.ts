@@ -2,7 +2,10 @@ import { Request, Response } from "express";
 import { asyncHandler } from "../middlewares/asyncHandler";
 import {
   createUserService,
-  getUserByPhoneService,
+  deleteUserService,
+  getUserByIdService,
+  getUsersService,
+  updateUserService,
 } from "../services/users.service";
 
 export const createUserController = asyncHandler(
@@ -14,10 +17,54 @@ export const createUserController = asyncHandler(
   },
 );
 
-export const getUserByPhoneController = asyncHandler(
+export const getUsersController = asyncHandler(
   async (req: Request, res: Response) => {
-    const { phone } = req.params as { phone: string };
-    const user = await getUserByPhoneService(phone);
-    res.status(200).json({ success: true, data: user });
+    const users = await getUsersService({
+      limit: req.query.limit as string | undefined,
+      page: req.query.page as string | undefined,
+      role_id: req.query.role_id as string | undefined,
+      role_name: req.query.role_name as string | undefined,
+      name: req.query.name as string | undefined,
+      phone: req.query.phone as string | undefined,
+      email: req.query.email as string | undefined,
+    });
+    return res.status(200).json({
+      success: true,
+      message: "Successfully retrieved the users.",
+      data: users,
+    });
+  },
+);
+
+export const getUserByIdController = asyncHandler(
+  async (req: Request, res: Response) => {
+    const user = await getUserByIdService(req.params.user_id as string);
+    return res.status(200).json({
+      success: true,
+      message: "Successfully retrieved the user.",
+      data: user,
+    });
+  },
+);
+
+export const updateUserController = asyncHandler(
+  async (req: Request, res: Response) => {
+    const user = await updateUserService(req.params.user_id as string, req.body);
+    return res.status(200).json({
+      success: true,
+      message: "User updated successfully",
+      data: user,
+    });
+  },
+);
+
+export const deleteUserController = asyncHandler(
+  async (req: Request, res: Response) => {
+    const data = await deleteUserService(req.params.user_id as string);
+    return res.status(200).json({
+      success: true,
+      message: "User deleted successfully",
+      data,
+    });
   },
 );

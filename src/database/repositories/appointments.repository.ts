@@ -10,6 +10,7 @@ export const createAppointmentRepository = async (
     end_time: string;
     location_id: string;
     created_by_id: string;
+    reason?: string;
   },
   t?: Transaction,
 ) => {
@@ -66,48 +67,60 @@ export const getAppointmentsRepository = async (
   });
 };
 
-export const getAppointmentStatusCountsByLocationRepository = async (filters: {
-  doctor_id: string;
+// Status-count breakdown grouped per day, per location, per doctor over the
+// requested period. doctor_name is returned encrypted (decrypt in the service).
+export const getAppointmentOverviewCountsRepository = async (filters: {
   start_date?: string;
   end_date?: string;
+  doctor_ids?: string[];
   location_ids?: string[];
 }) => {
-  const replacements: Record<string, unknown> = {
-    doctor_id: filters.doctor_id,
-  };
+  const replacements: Record<string, unknown> = {};
+  const conditions: string[] = [];
 
-  let date_condition = "";
   if (filters.start_date && filters.end_date) {
-    date_condition = "AND a.date BETWEEN :start_date AND :end_date";
+    conditions.push("a.date BETWEEN :start_date AND :end_date");
     replacements.start_date = filters.start_date;
     replacements.end_date = filters.end_date;
   }
-
-  let location_condition = "";
+  if (filters.doctor_ids) {
+    conditions.push("a.doctor_id IN (:doctor_ids)");
+    replacements.doctor_ids = filters.doctor_ids;
+  }
   if (filters.location_ids) {
-    location_condition = "AND a.location_id IN (:location_ids)";
+    conditions.push("a.location_id IN (:location_ids)");
     replacements.location_ids = filters.location_ids;
   }
+  const where_clause = conditions.length
+    ? `WHERE ${conditions.join(" AND ")}`
+    : "";
 
   return await sequelize.query<{
+    date: string;
     location_id: string;
-    name: string;
+    location_name: string;
+    doctor_id: string;
+    doctor_name: string;
     pending: number;
     completed: number;
     cancelled: number;
     total_scheduled: number;
   }>(
-    `SELECT a.location_id,
-            l.name,
+    `SELECT a.date::text AS date,
+            a.location_id,
+            l.name AS location_name,
+            a.doctor_id,
+            d.name AS doctor_name,
             COUNT(*) FILTER (WHERE a.status = 'scheduled')::int AS pending,
             COUNT(*) FILTER (WHERE a.status = 'completed')::int AS completed,
             COUNT(*) FILTER (WHERE a.status = 'cancelled')::int AS cancelled,
             COUNT(*)::int AS total_scheduled
        FROM appointments a
        JOIN locations l ON l.location_id = a.location_id
-      WHERE a.doctor_id = :doctor_id ${date_condition} ${location_condition}
-      GROUP BY a.location_id, l.name
-      ORDER BY l.name`,
+       JOIN users d ON d.user_id = a.doctor_id
+       ${where_clause}
+      GROUP BY a.date, a.location_id, l.name, a.doctor_id, d.name
+      ORDER BY a.date ASC, l.name ASC, a.doctor_id ASC`,
     { replacements, type: QueryTypes.SELECT },
   );
 };
@@ -126,6 +139,7 @@ export const updateAppointmentRepository = async (
     start_time: string;
     end_time: string;
     status: "scheduled" | "completed" | "cancelled";
+    reason: string;
     doctor_notes: string;
     prescription: string;
   }>,
