@@ -6,6 +6,7 @@ import doctorRoutineRoute from "./doctorRoutine.route";
 import appointmentsRoute from "./appointments.route";
 import rolesRoute from "./roles.route";
 import patientsRoute from "./patients.route";
+import patientDiagnosticsRoute from "./patientDiagnostics.route";
 
 const router = Router();
 
@@ -17,5 +18,6 @@ export default (): Router => {
   appointmentsRoute(router);
   rolesRoute(router);
   patientsRoute(router);
+  patientDiagnosticsRoute(router);
   return router;
 };

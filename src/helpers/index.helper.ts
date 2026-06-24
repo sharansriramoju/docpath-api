@@ -120,6 +120,7 @@ export const hashNameSearchTerms = (query: string): string[] => {
 const s3 = new AWS.S3({
   accessKeyId: process.env.ACCESS_KEY_ID,
   secretAccessKey: process.env.SECRET_ACCESS_KEY,
+  region: process.env.REGION,
 });
 
 const S3_BUCKET = process.env.S3_BUCKET_NAME!;
@@ -139,10 +140,14 @@ export async function uploadFileToS3(
     ContentType: file.mimetype,
   };
 
-  await s3.upload(params).promise();
+  const data = await s3.upload(params).promise();
 
   return {
-    url: `https://${S3_BUCKET}.s3.amazonaws.com/${key}`,
+    url: data.Location,
     key,
   };
+}
+
+export async function deleteFileFromS3(key: string): Promise<void> {
+  await s3.deleteObject({ Bucket: S3_BUCKET, Key: key }).promise();
 }
