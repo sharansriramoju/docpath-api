@@ -3,12 +3,14 @@ import {
   authorize,
   isAuthenticated,
   validate,
+  validateParams,
   validateQuery,
 } from "../middlewares/index.middleware";
 import {
-  createLocationValidation,
-  getLocationsValidation,
-  updateLocationValidation,
+  createLocationSchema,
+  getLocationsSchema,
+  locationIdParamsSchema,
+  updateLocationSchema,
 } from "../validations/locations.validation";
 import {
   createLocationController,
@@ -23,26 +25,27 @@ export default (router: Router) => {
     "/location",
     isAuthenticated,
     authorize("create", "Locations"),
-    validate(createLocationValidation),
+    validate(createLocationSchema),
     createLocationController,
   );
   router.get(
     "/locations",
     isAuthenticated,
     authorize("read", "Locations"),
-    validateQuery(getLocationsValidation),
+    validateQuery(getLocationsSchema),
     getLocationsController,
   );
   router.put(
     "/location",
     isAuthenticated,
     authorize("update", "Locations"),
-    validate(updateLocationValidation),
+    validate(updateLocationSchema),
     updateLocationController,
   );
   router.get(
     "/location/:location_id",
     isAuthenticated,
+    validateParams(locationIdParamsSchema),
     authorize("read", "Locations"),
     getLocationByIdController,
   );

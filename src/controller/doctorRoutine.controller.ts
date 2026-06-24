@@ -9,17 +9,16 @@ import {
 
 export const addDoctorRoutineController = asyncHandler(
   async (req: Request, res: Response) => {
-    // Implement logic to add doctor routine here
-    const userId = req.session.user.user_id;
-    const doctorRoutineData = await addDoctorRoutineService(
+    const user_id = req.session.user.user_id;
+    const doctor_routine_data = await addDoctorRoutineService(
       {
         ...req.body,
-        doctor_id: req.body.doctor_id || userId,
-        created_by_id: userId,
+        doctor_id: req.body.doctor_id || user_id,
+        created_by_id: user_id,
       },
       req.session.ability,
     );
-    res.status(201).json(doctorRoutineData);
+    res.status(201).json(doctor_routine_data);
   },
 );
 

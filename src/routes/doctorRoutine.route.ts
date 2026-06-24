@@ -3,12 +3,14 @@ import {
   authorize,
   isAuthenticated,
   validate,
+  validateParams,
   validateQuery,
 } from "../middlewares/index.middleware";
 import {
-  addDoctorRoutineValidation,
-  getDoctorRoutineValidation,
-  updateDoctorRoutineValidation,
+  addDoctorRoutineSchema,
+  doctorRoutineParamsSchema,
+  getDoctorRoutineSchema,
+  updateDoctorRoutineSchema,
 } from "../validations/doctorRoutine.validation";
 import {
   addDoctorRoutineController,
@@ -22,27 +24,29 @@ export default (router: Router) => {
     "/doctor-routine",
     isAuthenticated,
     authorize("create", "DoctorRoutine"),
-    validate(addDoctorRoutineValidation),
+    validate(addDoctorRoutineSchema),
     addDoctorRoutineController,
   );
   router.get(
     "/doctor-routine",
     isAuthenticated,
     authorize("read", "DoctorRoutine"),
-    validateQuery(getDoctorRoutineValidation),
+    validateQuery(getDoctorRoutineSchema),
     getDoctorRoutineController,
   );
   router.get(
     "/doctor-routine/:doctor_id/:routine_id",
     isAuthenticated,
+    validateParams(doctorRoutineParamsSchema),
     authorize("read", "DoctorRoutine"),
     getDoctorRoutineByIdController,
   );
   router.put(
     "/doctor-routine/:doctor_id/:routine_id",
     isAuthenticated,
+    validateParams(doctorRoutineParamsSchema),
     authorize("update", "DoctorRoutine"),
-    validate(updateDoctorRoutineValidation),
+    validate(updateDoctorRoutineSchema),
     updateDoctorRoutineController,
   );
 };

@@ -57,7 +57,6 @@ export const updateLocationController = asyncHandler(
 
 export const getLocationByIdController = asyncHandler(
   async (req: Request, res: Response) => {
-    // Implement logic to fetch a single location by ID here
     const location = await getLocationByIdService(
       req.params.location_id as string,
     );
@@ -71,7 +70,6 @@ export const getLocationByIdController = asyncHandler(
 
 export const getActiveLocationsController = asyncHandler(
   async (req: Request, res: Response) => {
-    // Implement logic to fetch active locations here
     const locations = await getActiveLocationsService(req.query);
     return res.status(200).json({
       success: true,

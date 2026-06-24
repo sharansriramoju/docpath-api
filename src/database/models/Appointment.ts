@@ -6,19 +6,25 @@ interface AppointmentAttributes {
   patient_id: string;
   doctor_id: string;
   location_id: string;
-  date: Date;
+  date: string;
   start_time: string;
   end_time: string;
+  reason?: string;
   doctor_notes?: string;
   prescription?: string;
   created_at?: Date;
   created_by_id: string;
-  status: "scheduled" | "completed" | "cancelled";
+  status?: "scheduled" | "completed" | "cancelled";
 }
 
 interface AppointmentCreationAttributes extends Optional<
   AppointmentAttributes,
-  "appointment_id" | "created_at" | "doctor_notes" | "prescription" | "status"
+  | "appointment_id"
+  | "created_at"
+  | "reason"
+  | "doctor_notes"
+  | "prescription"
+  | "status"
 > {}
 
 class Appointment
@@ -29,9 +35,10 @@ class Appointment
   public patient_id!: string;
   public doctor_id!: string;
   public location_id!: string;
-  public date!: Date;
+  public date!: string;
   public start_time!: string;
   public end_time!: string;
+  public reason?: string;
   public doctor_notes?: string;
   public prescription?: string;
   public status!: "scheduled" | "completed" | "cancelled";
@@ -82,6 +89,10 @@ Appointment.init(
     end_time: {
       type: DataTypes.TIME,
       allowNull: false,
+    },
+    reason: {
+      type: DataTypes.TEXT,
+      allowNull: true,
     },
     doctor_notes: {
       type: DataTypes.TEXT,

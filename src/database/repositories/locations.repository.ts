@@ -3,7 +3,7 @@ import { Location } from "../models";
 import { NotFoundError } from "../../errors/NotFoundError";
 
 export const createLocationRepository = async (
-  locationData: {
+  location_data: {
     name: string;
     latitude?: string;
     longitude?: string;
@@ -12,7 +12,7 @@ export const createLocationRepository = async (
   },
   t?: Transaction,
 ) => {
-  const location = await Location.create(locationData, { transaction: t });
+  const location = await Location.create(location_data, { transaction: t });
   return location.dataValues;
 };
 
@@ -22,17 +22,17 @@ export const getLocationsRepository = async (query: {
   offset?: number;
   status?: "active" | "inactive";
 }) => {
-  const whereClause: any = {};
+  const where_clause: any = {};
   if (query.search) {
-    whereClause.name = {
+    where_clause.name = {
       [Op.iLike]: `%${query.search}%`,
     };
   }
   if (query.status) {
-    whereClause.status = query.status;
+    where_clause.status = query.status;
   }
   const locations = await Location.findAndCountAll({
-    where: whereClause,
+    where: where_clause,
     limit: query.limit,
     offset: query.offset,
   });
@@ -40,7 +40,7 @@ export const getLocationsRepository = async (query: {
 };
 
 export const updateLocationRepository = async (
-  locationData: {
+  location_data: {
     location_id: string;
     name?: string;
     latitude?: string;
@@ -49,21 +49,21 @@ export const updateLocationRepository = async (
   },
   t?: Transaction,
 ) => {
-  const location = await Location.findByPk(locationData.location_id, {
+  const location = await Location.findByPk(location_data.location_id, {
     transaction: t,
   });
   if (!location) {
     throw new NotFoundError("Location not found");
   }
-  const [affectedCount, updatedLocation] = await Location.update(locationData, {
-    where: { location_id: locationData.location_id },
+  const [affected_count, updated_location] = await Location.update(location_data, {
+    where: { location_id: location_data.location_id },
     transaction: t,
     returning: true,
   });
-  if (affectedCount === 0) {
+  if (affected_count === 0) {
     throw new NotFoundError("Failed to update location");
   }
-  return updatedLocation[0];
+  return updated_location[0];
 };
 
 export const getLocationByIdRepository = async (location_id: string) => {

@@ -6,7 +6,7 @@ import {
 } from "../database/repositories/locations.repository";
 
 export const createLocationService = async (
-  locationData: {
+  location_data: {
     name: string;
     latitude?: string;
     longitude?: string;
@@ -15,7 +15,7 @@ export const createLocationService = async (
   user_id: string,
 ) => {
   const location = await createLocationRepository({
-    ...locationData,
+    ...location_data,
     created_by_id: user_id,
   });
   return location;
@@ -37,14 +37,14 @@ export const getLocationsServices = async (query: {
   });
 };
 
-export const updateLocationService = async (locationData: {
+export const updateLocationService = async (location_data: {
   location_id: string;
   name?: string;
   latitude?: string;
   longitude?: string;
   google_maps_url?: string;
 }) => {
-  const location = await updateLocationRepository(locationData);
+  const location = await updateLocationRepository(location_data);
   return location;
 };
 

@@ -12,9 +12,9 @@ interface UserAttributes {
   profile_image_url?: string;
   created_at?: Date;
   updated_at?: Date;
-  reporting_doctor_id?: string;
   hashed_email?: Buffer;
   hashed_phone: Buffer;
+  name_search_index?: string[];
 }
 
 interface UserCreationAttributes extends Optional<
@@ -26,7 +26,7 @@ interface UserCreationAttributes extends Optional<
   | "role_id"
   | "profile_image_url"
   | "hashed_email"
-  | "reporting_doctor_id"
+  | "name_search_index"
 > {}
 
 class User
@@ -43,6 +43,7 @@ class User
   public profile_image_url?: string;
   public hashed_email?: Buffer;
   public hashed_phone!: Buffer;
+  public name_search_index?: string[];
   public reporting_doctor_id?: string;
   public created_at?: Date;
   public updated_at?: Date;
@@ -76,6 +77,11 @@ User.init(
       type: DataTypes.BLOB,
       allowNull: true,
     },
+    // Prefix blind-index of the (encrypted) name for partial search.
+    name_search_index: {
+      type: DataTypes.ARRAY(DataTypes.TEXT),
+      allowNull: true,
+    },
     gender: {
       type: DataTypes.TEXT,
       allowNull: false,
@@ -96,14 +102,6 @@ User.init(
       type: DataTypes.TEXT,
       allowNull: true,
     },
-    reporting_doctor_id: {
-      type: DataTypes.UUID,
-      allowNull: true,
-      references: {
-        model: "users",
-        key: "user_id",
-      },
-    },
     updated_at: {
       type: DataTypes.DATE,
       defaultValue: sequelize.literal(
@@ -122,6 +120,14 @@ User.init(
     modelName: "User",
     tableName: "users",
     timestamps: false,
+    indexes: [
+      // GIN index accelerates the `name_search_index @> [...]` trigram search.
+      {
+        name: "users_name_search_index_gin",
+        fields: ["name_search_index"],
+        using: "GIN",
+      },
+    ],
   },
 );
 
