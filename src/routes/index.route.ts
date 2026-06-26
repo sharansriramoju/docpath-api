@@ -7,6 +7,7 @@ import appointmentsRoute from "./appointments.route";
 import rolesRoute from "./roles.route";
 import patientsRoute from "./patients.route";
 import patientDiagnosticsRoute from "./patientDiagnostics.route";
+import dashboardRoute from "./dashboard.route";
 
 const router = Router();
 
@@ -19,5 +20,6 @@ export default (): Router => {
   rolesRoute(router);
   patientsRoute(router);
   patientDiagnosticsRoute(router);
+  dashboardRoute(router);
   return router;
 };
