@@ -9,6 +9,7 @@ import {
   verifyOtpSchema,
 } from "../validations/authentication.validation";
 import {
+  getMeController,
   logoutController,
   sendOtpController,
   verifyOtpController,
@@ -27,5 +28,6 @@ export default (router: Router) => {
     validate(verifyOtpSchema),
     verifyOtpController,
   );
+  router.get("/auth/me", isAuthenticated, getMeController);
   router.post("/logout", isAuthenticated, logoutController);
 };

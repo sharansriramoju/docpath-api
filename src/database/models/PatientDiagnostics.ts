@@ -5,6 +5,7 @@ interface PatientDiagnosticAttributes {
   diagnostic_id: string;
   patient_id: string;
   media_url?: string;
+  media_key?: string;
   media_type?: string;
   description?: string;
   created_by_id: string;
@@ -13,7 +14,7 @@ interface PatientDiagnosticAttributes {
 
 interface PatientDiagnosticCreationAttributes extends Optional<
   PatientDiagnosticAttributes,
-  "diagnostic_id" | "created_at" | "media_url" | "description" | "media_type"
+  "diagnostic_id" | "created_at" | "media_url" | "media_key" | "description" | "media_type"
 > {}
 
 class PatientDiagnostic
@@ -26,6 +27,7 @@ class PatientDiagnostic
   public diagnostic_id!: string;
   public patient_id!: string;
   public media_url?: string;
+  public media_key?: string;
   public media_type?: string;
   public description?: string;
   public created_by_id!: string;
@@ -49,6 +51,10 @@ PatientDiagnostic.init(
       },
     },
     media_url: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    media_key: {
       type: DataTypes.TEXT,
       allowNull: true,
     },

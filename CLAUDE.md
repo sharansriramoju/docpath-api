@@ -45,6 +45,7 @@ src/
 - **Validation exports**: use `*Schema` suffix (not `*Validation`)
 - **Validation middlewares**: `validate(schema)` for body, `validateQuery(schema)` for query, `validateParams(schema)` for params
 - **Error class**: `ApiError` with `status_code` and `is_operational`
+- **List response shape**: All list/paginated endpoints return `{ rows: [], count: N }` inside `data` — no extra pagination fields
 
 ## Auth & authorization
 

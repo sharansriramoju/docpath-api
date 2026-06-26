@@ -42,6 +42,16 @@ export const verifyOtpController = asyncHandler(
   },
 );
 
+export const getMeController = asyncHandler(
+  async (req: Request, res: Response) => {
+    return res.status(200).json({
+      success: true,
+      data: req.session.user,
+      message: "Authenticated user details",
+    });
+  },
+);
+
 export const logoutController = asyncHandler(
   async (req: Request, res: Response) => {
     req.session.destroy((err) => {
