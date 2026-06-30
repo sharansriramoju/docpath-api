@@ -63,7 +63,11 @@ app.use(
 );
 
 // --- CORS (before routes) --- //
-const allowed_origins = ["http://localhost:49631", "http://localhost:5173"];
+const allowed_origins = [
+  "http://localhost:49631",
+  "http://localhost:5173",
+  "https://docpath-production.up.railway.app",
+];
 
 app.use(
   cors({
