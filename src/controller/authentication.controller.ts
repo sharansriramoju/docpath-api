@@ -5,6 +5,7 @@ import {
   verifyOtpService,
 } from "../services/authentication.service";
 import jwt from "jsonwebtoken";
+import "dotenv/config";
 
 export const sendOtpController = asyncHandler(
   async (req: Request, res: Response) => {
