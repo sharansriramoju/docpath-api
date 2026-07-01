@@ -5,10 +5,12 @@ import {
   verifyOtpRateLimiter,
 } from "../middlewares/rateLimit.middleware";
 import {
+  firebaseLoginSchema,
   sendOtpSchema,
   verifyOtpSchema,
 } from "../validations/authentication.validation";
 import {
+  firebaseLoginController,
   getMeController,
   logoutController,
   sendOtpController,
@@ -27,6 +29,11 @@ export default (router: Router) => {
     verifyOtpRateLimiter,
     validate(verifyOtpSchema),
     verifyOtpController,
+  );
+  router.post(
+    "/auth/firebase-login",
+    validate(firebaseLoginSchema),
+    firebaseLoginController,
   );
   router.get("/auth/me", isAuthenticated, getMeController);
   router.post("/logout", isAuthenticated, logoutController);

@@ -11,3 +11,7 @@ export const verifyOtpSchema = z.object({
     .min(4, "OTP must be at least 4 digits")
     .max(6, "OTP must be at most 6 digits"),
 });
+
+export const firebaseLoginSchema = z.object({
+  id_token: z.string().min(1, "Firebase ID token is required"),
+});

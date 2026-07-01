@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { asyncHandler } from "../middlewares/asyncHandler";
 import {
+  firebaseLoginService,
   sendOtpService,
   verifyOtpService,
 } from "../services/authentication.service";
@@ -31,6 +32,35 @@ export const verifyOtpController = asyncHandler(
     res.cookie("token", token, {
       httpOnly: process.env.HA_HTTP_ONLY === "true", // <-- dev/Postman
       secure: process.env.HA_SECURE_COOKIE == "true", // <-- dev/Postman over HTTP
+      sameSite:
+        (process.env.HA_COOKIE_SAME_SITE as "lax" | "strict" | "none") || "lax",
+      maxAge: 2592000000,
+    });
+    return res.status(200).json({
+      success: true,
+      data: user,
+      message: "Login successful",
+    });
+  },
+);
+
+export const firebaseLoginController = asyncHandler(
+  async (req: Request, res: Response) => {
+    const user = await firebaseLoginService(req.body.id_token);
+    const token = jwt.sign(
+      { phone: user.phone, user_id: user.user_id },
+      process.env.HA_JWT_SECRET || "default_secret_key",
+    );
+    await new Promise<void>((resolve, reject) => {
+      req.session.regenerate((err) => (err ? reject(err) : resolve()));
+    });
+    req.session.user = user;
+    await new Promise<void>((resolve, reject) => {
+      req.session.save((err) => (err ? reject(err) : resolve()));
+    });
+    res.cookie("token", token, {
+      httpOnly: process.env.HA_HTTP_ONLY === "true",
+      secure: process.env.HA_SECURE_COOKIE == "true",
       sameSite:
         (process.env.HA_COOKIE_SAME_SITE as "lax" | "strict" | "none") || "lax",
       maxAge: 2592000000,

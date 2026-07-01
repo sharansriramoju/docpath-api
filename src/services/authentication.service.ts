@@ -6,6 +6,7 @@ import { getUserByHashedPhoneRepository } from "../database/repositories/users.r
 import { NotFoundError } from "../errors/NotFoundError";
 import { ValidationError } from "../errors/ValidationError";
 import { decryptPII, hashForLookup } from "../helpers/index.helper";
+import firebaseAdmin from "../config/firebase";
 
 export const sendOtpService = async (data: { phone: string }) => {
   // Check if user exists by email or phone
@@ -48,6 +49,11 @@ export const verifyOtpService = async (data: {
   if (!user) {
     throw new NotFoundError("User not found with the provided phone number");
   }
+
+  return buildSessionUser(user);
+};
+
+const buildSessionUser = (user: any) => {
   user.reporting_doctors.map((doctor: any) => {
     doctor.name = decryptPII(doctor.name);
   });
@@ -71,4 +77,28 @@ export const verifyOtpService = async (data: {
     locations: user.locations,
     reported_users: user.reported_users,
   };
+};
+
+export const firebaseLoginService = async (id_token: string) => {
+  const decoded_token = await firebaseAdmin
+    .auth()
+    .verifyIdToken(id_token)
+    .catch(() => {
+      throw new ValidationError("Invalid or expired Firebase ID token");
+    });
+
+  const phone_number = decoded_token.phone_number;
+  if (!phone_number) {
+    throw new ValidationError("Phone number not found in Firebase token");
+  }
+
+  const normalized_phone = phone_number.replace(/^\+91/, "");
+  const hashed_phone = hashForLookup(normalized_phone);
+  const user: any = await getUserByHashedPhoneRepository(hashed_phone);
+
+  if (!user) {
+    throw new NotFoundError("User not found with the provided phone number");
+  }
+
+  return buildSessionUser(user);
 };
